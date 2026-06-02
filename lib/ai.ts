@@ -3,16 +3,26 @@ export type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: stri
 type ModelOption = { id: string; label: string };
 
 function getBaseUrl() {
-  return (process.env.OPENCODE_BASE_URL || 'http://localhost:4096').replace(/\/$/, '');
+  // 127.0.0.1 matches opencode serve default hostname (avoids some Windows localhost/IPv6 issues).
+  return (process.env.OPENCODE_BASE_URL || 'http://127.0.0.1:4096').replace(/\/$/, '');
 }
 
 function authHeaders(): Record<string, string> {
   const headers: Record<string, string> = {};
-  // OpenCode server uses HTTP Basic Auth when OPENCODE_SERVER_PASSWORD is set.
   const user = process.env.OPENCODE_SERVER_USERNAME || 'opencode';
-  const pass = process.env.OPENCODE_SERVER_PASSWORD || process.env.OPENCODE_API_KEY || '';
+  const pass = process.env.OPENCODE_SERVER_PASSWORD ?? '';
   if (pass) headers.Authorization = `Basic ${Buffer.from(`${user}:${pass}`).toString('base64')}`;
   return headers;
+}
+
+function connectionHelp(baseUrl: string, path: string) {
+  return [
+    `${baseUrl}${path} erişilemiyor.`,
+    'OpenCode sunucusu çalışmıyor veya yanlış portta olabilir. Ayrı bir terminalde:',
+    '  npm run opencode:serve',
+    'veya: opencode serve --port 4096',
+    'Not: `opencode serve` (portsuz) rastgele port kullanır; bu uygulama 4096 bekler.',
+  ].join(' ');
 }
 
 async function fetchJson(path: string, init?: RequestInit) {
@@ -21,10 +31,24 @@ async function fetchJson(path: string, init?: RequestInit) {
   try {
     res = await fetch(`${baseUrl}${path}`, { ...init, headers: { ...authHeaders(), ...(init?.headers || {}) }, cache: 'no-store' });
   } catch {
-    throw new Error(`${baseUrl}${path} erişilemiyor. Terminalde "opencode serve --port 4096" çalışıyor mu?`);
+    throw new Error(connectionHelp(baseUrl, path));
+  }
+  if (res.status === 401) {
+    throw new Error(
+      `${path}: 401 yetkisiz. .env içindeki OPENCODE_SERVER_PASSWORD, sunucuyu başlattığın şifreyle aynı olmalı. (OPENCODE_API_KEY yerel sunucu auth için kullanılmaz.)`,
+    );
   }
   if (!res.ok) throw new Error(`${path} başarısız: ${res.status} ${await res.text()}`);
   return res.status === 204 ? null : res.json();
+}
+
+export async function checkOpenCodeHealth(): Promise<{ ok: boolean; version?: string; error?: string }> {
+  try {
+    const json = await fetchJson('/global/health');
+    return { ok: Boolean(json?.healthy), version: json?.version };
+  } catch (e: unknown) {
+    return { ok: false, error: e instanceof Error ? e.message : 'Bağlantı hatası' };
+  }
 }
 
 export async function listOpenCodeModels(): Promise<ModelOption[]> {

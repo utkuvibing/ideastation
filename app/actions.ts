@@ -1,9 +1,9 @@
 'use server';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
 import { chatWithOpenCode } from '@/lib/ai';
-
 const allowedUsers = new Map([
   ['admin@miniteamflow.local', 'password'],
   ['admin2@miniteamflow.local', 'password'],
@@ -22,8 +22,8 @@ export async function login(form: FormData) {
 
 export async function createApp(form: FormData) {
   const fields = ['name','category','one_liner','target_audience','main_problem','core_features','unique_selling_points','competitors','brand_tone','content_style','dos','donts','winning_ads','failed_ads','app_store_link','play_store_link','ai_instructions'];
-  db.prepare(`INSERT INTO apps (${fields.join(',')}) VALUES (${fields.map(()=>'?').join(',')})`).run(...fields.map(f => String(form.get(f)||'')));
-  redirect('/apps');
+  const result = db.prepare(`INSERT INTO apps (${fields.join(',')}) VALUES (${fields.map(()=>'?').join(',')})`).run(...fields.map(f => String(form.get(f)||'')));
+  redirect(`/ai-brainstorm?app_id=${result.lastInsertRowid}`);
 }
 
 export async function createIdea(form: FormData) {
@@ -35,7 +35,35 @@ export async function createIdea(form: FormData) {
 
 export async function addFeedback(form: FormData) {
   const name = (await cookies()).get('user_name')?.value || 'unknown';
-  db.prepare('INSERT INTO feedback (idea_id,user_name,sentiment,viral_score,ease_score,brand_fit_score,originality_score,comment) VALUES (?,?,?,?,?,?,?,?)').run(form.get('idea_id'), name, form.get('sentiment'), form.get('viral_score'), form.get('ease_score'), form.get('brand_fit_score'), form.get('originality_score'), form.get('comment'));
+  const ideaId = String(form.get('idea_id') || '');
+  db.prepare('INSERT INTO feedback (idea_id,user_name,sentiment,viral_score,ease_score,brand_fit_score,originality_score,comment) VALUES (?,?,?,?,?,?,?,?)').run(ideaId, name, form.get('sentiment'), form.get('viral_score'), form.get('ease_score'), form.get('brand_fit_score'), form.get('originality_score'), form.get('comment'));
+  redirect(`/ideas/${ideaId}`);
+}
+
+export async function updateIdeaStatus(form: FormData) {
+  const ideaId = String(form.get('idea_id') || '');
+  const status = String(form.get('status') || '');
+  const returnTo = String(form.get('return_to') || '/kanban');
+  if (!ideaId || !status) redirect(returnTo);
+  db.prepare('UPDATE ideas SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?').run(status, ideaId);
+  revalidatePath('/kanban');
+  revalidatePath('/ideas');
+  revalidatePath(`/ideas/${ideaId}`);
+  redirect(returnTo);
+}
+
+export async function resetWorkspaceData(form: FormData) {
+  if (String(form.get('confirm') || '') !== 'RESET') redirect('/settings?error=confirm');
+  db.exec(`
+    DELETE FROM feedback;
+    DELETE FROM comments;
+    DELETE FROM ai_generations;
+    DELETE FROM images;
+    DELETE FROM ideas;
+    DELETE FROM apps;
+  `);
+  revalidatePath('/');
+  redirect('/settings?reset=1');
 }
 
 export async function runAIBrainstorm(form: FormData) {

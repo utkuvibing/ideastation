@@ -1,4 +1,64 @@
 import { db } from '@/lib/db';
+import { updateIdeaStatus } from '@/app/actions';
+
 export const dynamic = 'force-dynamic';
-const statuses=['draft','needs_feedback','approved','needs_script','ready_to_shoot','shooting','shot','editing','published','rejected','archived'];
-export default function Kanban(){ const ideas:any[]=db.prepare('select ideas.*, apps.name app_name from ideas left join apps on apps.id=ideas.app_id order by ideas.id desc').all(); return <div className="space-y-4"><h1 className="text-3xl font-bold">Kanban</h1><div className="flex gap-4 overflow-x-auto pb-4">{statuses.map(s=><div className="min-w-72 space-y-3" key={s}><h2 className="font-bold sticky top-0 bg-zinc-50 dark:bg-zinc-950">{s}</h2>{ideas.filter(i=>i.status===s).map(i=><a href={`/ideas/${i.id}`} className="card block" key={i.id}><b>{i.title}</b><p className="text-sm opacity-60">{i.app_name} / {i.format}</p><p className="text-sm">AI: {i.ai_score||'-'}</p></a>)}</div>)}</div></div>}
+const statuses = [
+  'draft',
+  'needs_feedback',
+  'approved',
+  'needs_script',
+  'ready_to_shoot',
+  'shooting',
+  'shot',
+  'editing',
+  'published',
+  'rejected',
+  'archived',
+];
+
+export default function Kanban() {
+  const ideas: any[] = db
+    .prepare('select ideas.*, apps.name app_name from ideas left join apps on apps.id=ideas.app_id order by ideas.id desc')
+    .all();
+  return (
+    <div className="space-y-4">
+      <h1 className="text-3xl font-bold">Kanban</h1>
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {statuses.map((s) => (
+          <div className="min-w-72 space-y-3" key={s}>
+            <h2 className="font-bold sticky top-0 bg-zinc-50 dark:bg-zinc-950 py-1">
+              {s} ({ideas.filter((i) => i.status === s).length})
+            </h2>
+            {ideas
+              .filter((i) => i.status === s)
+              .map((i) => (
+                <div className="card space-y-2" key={i.id}>
+                  <a href={`/ideas/${i.id}`} className="block hover:opacity-80">
+                    <b>{i.title}</b>
+                    <p className="text-sm opacity-60">
+                      {i.app_name} / {i.format}
+                    </p>
+                    <p className="text-sm">AI: {i.ai_score || '-'}</p>
+                  </a>
+                  <form action={updateIdeaStatus} className="flex gap-1 text-xs">
+                    <input type="hidden" name="idea_id" value={i.id} />
+                    <input type="hidden" name="return_to" value="/kanban" />
+                    <select name="status" defaultValue={i.status} className="flex-1 text-xs py-1">
+                      {statuses.map((st) => (
+                        <option key={st} value={st}>
+                          {st}
+                        </option>
+                      ))}
+                    </select>
+                    <button type="submit" className="px-2 py-1">
+                      Taşı
+                    </button>
+                  </form>
+                </div>
+              ))}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
