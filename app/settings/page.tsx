@@ -54,10 +54,6 @@ export default async function Settings({
           </button>
         </form>
       </div>
-      <div className="card space-y-2">
-        <h2 className="font-bold">Giriş</h2>
-        <p className="text-sm opacity-70">Test: admin@miniteamflow.local / password</p>
-      </div>
       <div className="card"><h2 className="font-bold">Theme</h2><p>Dark/light toggle sonraki polish adımında eklenecek.</p></div>
     </div>
   );
