@@ -1,0 +1,37 @@
+export const appFieldLabels: Record<string, string> = {
+  category: 'Kategori',
+  one_liner: 'Kısa tanım',
+  target_audience: 'Hedef kitle',
+  main_problem: 'Temel problem',
+  core_features: 'Temel özellikler',
+  unique_selling_points: 'Farklılaşma noktaları',
+  competitors: 'Rakipler',
+  brand_tone: 'Marka dili',
+  content_style: 'İçerik stili',
+  dos: 'Yapılacaklar',
+  donts: 'Kaçınılacaklar',
+  winning_ads: 'Başarılı reklam referansları',
+  failed_ads: 'Başarısız reklam notları',
+  app_store_link: 'App Store bağlantısı',
+  play_store_link: 'Play Store bağlantısı',
+  ai_instructions: 'AI talimatları',
+};
+
+export const ideaFieldLabels: Record<string, string> = {
+  description: 'Açıklama',
+  hook: 'Hook',
+  script: 'Senaryo',
+  storyboard: 'Storyboard',
+  visual_notes: 'Görsel notları',
+  voiceover: 'Seslendirme',
+  caption: 'Açıklama metni',
+  cta: 'Aksiyon çağrısı',
+  hashtags: 'Etiketler',
+  why_it_might_work: 'Neden işe yarayabilir?',
+  risks: 'Riskler',
+  production_difficulty: 'Prodüksiyon zorluğu',
+  source: 'Kaynak',
+  competitor_url: 'Rakip içerik bağlantısı',
+  competitor_notes: 'Rakip içerik notları',
+};
+

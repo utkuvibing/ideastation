@@ -43,15 +43,15 @@ cp .env.example .env
 # .env dosyasını düzenle (repo dışında tutulur)
 ```
 
-Yerel geliştirme için iki süreç:
+Yerel geliştirme için tek komut:
 
 ```bash
-# Terminal 1 — AI kullanacaksan
-npm run opencode:serve
-
-# Terminal 2
 npm run dev
 ```
+
+Bu komut production build alır, ardından Next.js ve OpenCode sunucusunu aynı
+terminalde başlatır. Next.js geliştirme göstergesi bu modda görünmez. Kod
+geliştirirken hot reload için `npm run dev:code` kullanılabilir.
 
 Uygulama: [http://localhost:3000](http://localhost:3000)
 
@@ -81,3 +81,26 @@ data/         # SQLite (gitignore)
 - `.env` ve `data/` commit edilmemelidir.  
 - Üretimde auth, HTTPS ve OpenCode erişimini kendi ortamınıza göre sıkılaştırın.  
 - AI çıktısı otomatik idea kaydına dönüşmez; upload, yorumlar ve tam CRUD henüz sınırlı.
+
+## In-house operasyon
+
+`.env` içinde `SESSION_SECRET` için en az 32 karakterlik rastgele bir değer ve
+`IDEASTATION_USERS` için virgülle ayrılmış `email:password` kayıtları tanımlayın.
+
+```bash
+npm ci
+npm run check
+npm run start
+```
+
+Uygulamayı şirket VPN'i veya HTTPS sağlayan bir iç ağ geçidi arkasında yayınlayın.
+SQLite dosyasını uygulama sunucusunun yerel kalıcı diskinde tutun, paylaşımlı ağ
+diskinde çalıştırmayın.
+
+```bash
+npm run backup
+```
+
+Bu komut tutarlı bir SQLite yedeğini `BACKUP_DIR` dizinine yazar. Bu dizini ayrı
+bir kalıcı depoya periyodik olarak kopyalayın. Geri yüklemeden önce uygulamayı
+durdurun ve mevcut veritabanının ayrıca yedeğini alın.

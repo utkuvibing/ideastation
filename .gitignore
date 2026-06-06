@@ -1,5 +1,9 @@
 node_modules
 .next
+.next-dev
 .env
 data
 uploads
+backups
+*.log
+*.tsbuildinfo

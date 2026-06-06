@@ -36,6 +36,12 @@ export default function Ideas() {
         <IdeaCreateForm apps={apps} />
       )}
       <div className="space-y-3">
+        {!ideas.length && (
+          <div className="card py-10 text-center">
+            <h2 className="font-bold">Henüz fikir yok</h2>
+            <p className="mt-1 text-sm opacity-60">“Yeni fikir ekle” ile ilk fikri oluştur.</p>
+          </div>
+        )}
         {ideas.map((i) => (
           <a className="card block" href={`/ideas/${i.id}`} key={i.id}>
             <b>{i.title}</b>

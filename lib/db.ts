@@ -6,6 +6,8 @@ const dbPath = process.env.DATABASE_PATH || './data/app.db';
 fs.mkdirSync(path.dirname(dbPath), { recursive: true });
 export const db = new Database(dbPath, { timeout: 5000 });
 db.pragma('busy_timeout = 5000');
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
 
 export function initDb() {
   db.exec(`

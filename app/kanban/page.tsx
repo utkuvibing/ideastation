@@ -1,64 +1,30 @@
 import { db } from '@/lib/db';
-import { updateIdeaStatus } from '@/app/actions';
+import { KanbanBoard } from '@/components/kanban-board';
 
 export const dynamic = 'force-dynamic';
-const statuses = [
-  'draft',
-  'needs_feedback',
-  'approved',
-  'needs_script',
-  'ready_to_shoot',
-  'shooting',
-  'shot',
-  'editing',
-  'published',
-  'rejected',
-  'archived',
-];
 
 export default function Kanban() {
-  const ideas: any[] = db
-    .prepare('select ideas.*, apps.name app_name from ideas left join apps on apps.id=ideas.app_id order by ideas.id desc')
-    .all();
+  const ideas = db.prepare(`
+    SELECT ideas.id, ideas.app_id, ideas.title, ideas.format, ideas.status,
+      ideas.hook, ideas.ai_score, ideas.updated_at, apps.name AS app_name
+    FROM ideas
+    LEFT JOIN apps ON apps.id = ideas.app_id
+    ORDER BY ideas.updated_at DESC, ideas.id DESC
+  `).all() as Parameters<typeof KanbanBoard>[0]['initialIdeas'];
+  const apps = db.prepare('SELECT id, name, category, one_liner FROM apps ORDER BY name').all() as {
+    id: number;
+    name: string;
+    category?: string;
+    one_liner?: string;
+  }[];
+
   return (
-    <div className="space-y-4">
-      <h1 className="text-3xl font-bold">Kanban</h1>
-      <div className="flex gap-4 overflow-x-auto pb-4">
-        {statuses.map((s) => (
-          <div className="min-w-72 space-y-3" key={s}>
-            <h2 className="font-bold sticky top-0 bg-zinc-50 dark:bg-zinc-950 py-1">
-              {s} ({ideas.filter((i) => i.status === s).length})
-            </h2>
-            {ideas
-              .filter((i) => i.status === s)
-              .map((i) => (
-                <div className="card space-y-2" key={i.id}>
-                  <a href={`/ideas/${i.id}`} className="block hover:opacity-80">
-                    <b>{i.title}</b>
-                    <p className="text-sm opacity-60">
-                      {i.app_name} / {i.format}
-                    </p>
-                    <p className="text-sm">AI: {i.ai_score || '-'}</p>
-                  </a>
-                  <form action={updateIdeaStatus} className="flex gap-1 text-xs">
-                    <input type="hidden" name="idea_id" value={i.id} />
-                    <input type="hidden" name="return_to" value="/kanban" />
-                    <select name="status" defaultValue={i.status} className="flex-1 text-xs py-1">
-                      {statuses.map((st) => (
-                        <option key={st} value={st}>
-                          {st}
-                        </option>
-                      ))}
-                    </select>
-                    <button type="submit" className="px-2 py-1">
-                      Taşı
-                    </button>
-                  </form>
-                </div>
-              ))}
-          </div>
-        ))}
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-3xl font-bold">Kanban</h1>
+        <p className="mt-1 opacity-60">App seç, o app için kart oluştur ve fikirleri üretim aşamaları arasında taşı.</p>
       </div>
+      <KanbanBoard initialIdeas={ideas} apps={apps} />
     </div>
   );
 }
