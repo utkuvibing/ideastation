@@ -1,106 +1,122 @@
 # IdeaStation
 
-Mobil uygulama projeleri için reklam ve short-form video fikirlerini toplayan, ekip içi kullanıma yönelik bir fikir planlama aracı. App brief tanımlama, hook/script/storyboard notları, Kanban ile durum takibi ve fikir başına feedback.
+IdeaStation, mobil uygulamalar için reklam ve kısa video fikirlerini ekip içinde
+oluşturmak, AI ile geliştirmek ve Kanban üzerinden takip etmek için hazırlanmış
+bir fikir planlama aracıdır.
 
-## Tech stack
+## Özellikler
 
-| Katman | Teknoloji |
-|--------|-----------|
-| Framework | [Next.js](https://nextjs.org/) (App Router, Server Actions) |
-| UI | React, [Tailwind CSS](https://tailwindcss.com/) |
-| Veritabanı | SQLite (`better-sqlite3`) |
-| AI (opsiyonel) | [OpenCode](https://opencode.ai/) HTTP API |
-| Dil | TypeScript |
+- Uygulama ve kampanya brief'leri oluşturma
+- Hook, senaryo, storyboard ve prodüksiyon notları içeren fikir kartları
+- App bazlı Kanban, arama, filtreleme ve sürükle-bırak durum yönetimi
+- OpenCode üzerinden AI Brainstorm
+- AI işlemleri için yüklenme, başarı ve hata bildirimleri
+- Fikir başına skor ve geri bildirim
+- App ve fikir silme
+- İmzalı oturum ve ortam değişkeni tabanlı kullanıcı yönetimi
+- SQLite yedekleme ve yapılandırma kontrolü
 
-## Nasıl çalışır?
+## Teknolojiler
 
-- **apps** — Ürün / kampanya brief alanları  
-- **ideas** — Video fikir kartları (format, hook, script, storyboard, status…)  
-- **feedback** — Idea üzerine skor ve yorum  
-- **ai_generations** — AI brainstorm geçmişi (OpenCode açıksa)
-
-Akış: giriş → app brief → (isteğe bağlı) AI brainstorm → idea kaydı → Kanban / feedback.
-
-| Rota | Açıklama |
-|------|----------|
-| `/apps` | Brief oluşturma |
-| `/ideas` | Fikir oluşturma |
-| `/kanban` | Statü kolonları |
-| `/ai-brainstorm` | OpenCode ile üretim |
-| `/settings` | OpenCode durumu, veri sıfırlama |
-
-**Random doldur** formları örnek metinle doldurur; kaydetmez.
+- Next.js App Router ve Server Actions
+- React ve Tailwind CSS
+- SQLite (`better-sqlite3`)
+- OpenCode HTTP API
+- TypeScript
 
 ## Kurulum
 
-**Gereksinimler:** Node.js 20+, npm. AI için [OpenCode CLI](https://opencode.ai/).
+Gereksinimler:
+
+- Node.js 20 veya üzeri
+- npm
+- AI özellikleri için [OpenCode CLI](https://opencode.ai/)
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/utkuvibing/ideastation.git
 cd ideastation
 npm install
-cp .env.example .env
-# .env dosyasını düzenle (repo dışında tutulur)
+copy .env.example .env
 ```
 
-Yerel geliştirme için tek komut:
+`.env` dosyasındaki kullanıcı, oturum ve OpenCode şifrelerini gerçek ve güçlü
+değerlerle değiştirin.
+
+```dotenv
+COMPANY_NAME="YourCompany"
+SESSION_SECRET="en-az-32-karakter-rastgele-bir-deger"
+IDEASTATION_USERS="admin@example.com:guclu-bir-sifre"
+DATABASE_PATH="./data/app.db"
+BACKUP_DIR="./backups"
+OPENCODE_BASE_URL="http://127.0.0.1:4096"
+OPENCODE_SERVER_PASSWORD="opencode-icin-guclu-bir-sifre"
+```
+
+## Çalıştırma
+
+Normal kullanım için:
 
 ```bash
 npm run dev
 ```
 
-Bu komut production build alır, ardından Next.js ve OpenCode sunucusunu aynı
-terminalde başlatır. Next.js geliştirme göstergesi bu modda görünmez. Kod
-geliştirirken hot reload için `npm run dev:code` kullanılabilir.
+Bu komut:
+
+1. Kullanılan `3000` ve `4096` portlarını temizler.
+2. Production build oluşturur.
+3. Next.js ve OpenCode sunucusunu aynı terminalde başlatır.
 
 Uygulama: [http://localhost:3000](http://localhost:3000)
 
-OpenCode portu `.env` içindeki `OPENCODE_BASE_URL` ile tanımlanır (`opencode:serve` script’i varsayılan olarak 4096 kullanır).
-
-**Giriş:** Kimlik doğrulama geliştirme aşamasındadır; kullanıcıları `app/actions.ts` içinde veya ileride env tabanlı yapılandırmayla tanımlayın. **Gerçek şifre veya API anahtarlarını repoya veya README’ye yazmayın.**
+Kod geliştirirken hot reload için:
 
 ```bash
-npm run build
-npm run start
+npm run dev:code
 ```
 
-`better-sqlite3` native modül hatasında: `npm rebuild better-sqlite3`
+## Kontrol ve Yedekleme
 
-## Proje yapısı (özet)
-
-```
-app/          # Sayfalar ve Server Actions
-components/   # Client formlar (random doldur)
-lib/          # db, ai, random-fill
-middleware.ts # Route koruması
-data/         # SQLite (gitignore)
-```
-
-## Notlar
-
-- `.env` ve `data/` commit edilmemelidir.  
-- Üretimde auth, HTTPS ve OpenCode erişimini kendi ortamınıza göre sıkılaştırın.  
-- AI çıktısı otomatik idea kaydına dönüşmez; upload, yorumlar ve tam CRUD henüz sınırlı.
-
-## In-house operasyon
-
-`.env` içinde `SESSION_SECRET` için en az 32 karakterlik rastgele bir değer ve
-`IDEASTATION_USERS` için virgülle ayrılmış `email:password` kayıtları tanımlayın.
+Yapılandırma, TypeScript ve production build kontrolü:
 
 ```bash
-npm ci
 npm run check
-npm run start
 ```
 
-Uygulamayı şirket VPN'i veya HTTPS sağlayan bir iç ağ geçidi arkasında yayınlayın.
-SQLite dosyasını uygulama sunucusunun yerel kalıcı diskinde tutun, paylaşımlı ağ
-diskinde çalıştırmayın.
+SQLite yedeği:
 
 ```bash
 npm run backup
 ```
 
-Bu komut tutarlı bir SQLite yedeğini `BACKUP_DIR` dizinine yazar. Bu dizini ayrı
-bir kalıcı depoya periyodik olarak kopyalayın. Geri yüklemeden önce uygulamayı
-durdurun ve mevcut veritabanının ayrıca yedeğini alın.
+Yedekler varsayılan olarak `backups/` dizinine yazılır.
+
+## Sayfalar
+
+| Rota | Açıklama |
+| --- | --- |
+| `/` | Genel durum ve son fikirler |
+| `/apps` | App brief oluşturma ve yönetme |
+| `/ideas` | Fikir oluşturma, inceleme ve geri bildirim |
+| `/kanban` | App bazlı üretim ve yayın süreci |
+| `/ai-brainstorm` | OpenCode ile fikir üretme ve geçmiş |
+| `/settings` | OpenCode durumu ve çalışma alanı ayarları |
+
+## Proje Yapısı
+
+```text
+app/          Sayfalar ve Server Actions
+components/   Formlar ve etkileşimli arayüz bileşenleri
+lib/          Veritabanı, AI, auth ve ortak tanımlar
+scripts/      Yapılandırma, port temizleme ve yedekleme araçları
+proxy.ts      Rota ve oturum koruması
+data/         SQLite veritabanı, Git dışında tutulur
+backups/      Yerel yedekler, Git dışında tutulur
+```
+
+## Operasyon Notları
+
+- `.env`, `data/` ve `backups/` repoya gönderilmez.
+- Uygulamayı şirket VPN'i veya HTTPS sağlayan bir iç ağ geçidi arkasında yayınlayın.
+- SQLite dosyasını uygulama sunucusunun yerel kalıcı diskinde tutun.
+- `backups/` dizinini düzenli olarak ayrı bir kalıcı depoya kopyalayın.
+- AI çıktıları geçmişe kaydedilir ancak otomatik olarak fikir kartına dönüştürülmez.
