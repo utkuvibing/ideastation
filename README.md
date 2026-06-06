@@ -36,21 +36,11 @@ Gereksinimler:
 git clone https://github.com/utkuvibing/ideastation.git
 cd ideastation
 npm install
-copy .env.example .env
 ```
 
-`.env` dosyasındaki kullanıcı, oturum ve OpenCode şifrelerini gerçek ve güçlü
-değerlerle değiştirin.
-
-```dotenv
-COMPANY_NAME="YourCompany"
-SESSION_SECRET="en-az-32-karakter-rastgele-bir-deger"
-IDEASTATION_USERS="admin@example.com:guclu-bir-sifre"
-DATABASE_PATH="./data/app.db"
-BACKUP_DIR="./backups"
-OPENCODE_BASE_URL="http://127.0.0.1:4096"
-OPENCODE_SERVER_PASSWORD="opencode-icin-guclu-bir-sifre"
-```
+Uygulamayı çalıştırmak için gerekli `.env` dosyasını proje yöneticisinden veya
+şirket içi güvenli paylaşım kanalından temin edip proje kök dizinine yerleştirin.
+Gerçek kullanıcı ve servis şifrelerini GitHub üzerinden paylaşmayın.
 
 ## Çalıştırma
 
