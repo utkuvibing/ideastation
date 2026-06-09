@@ -2,6 +2,7 @@ import './globals.css';
 import Link from 'next/link';
 import { getSession } from '@/lib/auth';
 import { logout } from '@/app/actions';
+import { AIJobToasts } from '@/components/ai-job-toasts';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -18,6 +19,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <form action={logout}><button className="w-full">Çıkış yap</button></form>
       </aside>
       <main id="main-content" className="min-w-0 flex-1 p-4 sm:p-6">{children}</main>
+      <AIJobToasts />
     </div> : children}
   </body></html>;
 }

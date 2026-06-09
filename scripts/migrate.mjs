@@ -121,6 +121,15 @@ const migrations = [
     CREATE INDEX IF NOT EXISTS idx_performance_idea_date ON performance_metrics(idea_id, report_date);
     CREATE INDEX IF NOT EXISTS idx_webhook_deliveries_created ON webhook_deliveries(created_at);
   `},
+  { version: 5, name: 'background_ai_jobs', sql: `
+    ALTER TABLE ai_generations ADD COLUMN status TEXT NOT NULL DEFAULT 'completed'
+      CHECK(status IN ('queued','running','completed','failed'));
+    ALTER TABLE ai_generations ADD COLUMN error_message TEXT;
+    ALTER TABLE ai_generations ADD COLUMN started_at TEXT;
+    ALTER TABLE ai_generations ADD COLUMN completed_at TEXT;
+    CREATE INDEX IF NOT EXISTS idx_ai_generations_user_status
+      ON ai_generations(created_by, status, id);
+  `},
 ];
 
 db.exec('CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)');

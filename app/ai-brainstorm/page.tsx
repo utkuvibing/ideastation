@@ -21,6 +21,8 @@ export default async function AIBrainstorm({
     model: string;
     app_name?: string;
     response?: string;
+    status?: string;
+    error_message?: string;
   }[] = db
     .prepare(
       'select ai_generations.*, apps.name app_name from ai_generations left join apps on apps.id=ai_generations.app_id where apps.deleted_at is null order by ai_generations.id desc limit 20',
@@ -62,12 +64,21 @@ export default async function AIBrainstorm({
           <h2 className="font-bold">
             Sonuç: {selected.action} / {selected.model}
           </h2>
-          <pre className="whitespace-pre-wrap text-sm">{selected.response}</pre>
+          {selected.status === 'failed' ? (
+            <div role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-red-700 dark:text-red-300">
+              <h3 className="font-bold">AI fikir üretimi başarısız</h3>
+              <p className="mt-1 whitespace-pre-wrap text-sm">{selected.error_message || 'Bilinmeyen bir hata oluştu.'}</p>
+            </div>
+          ) : selected.status === 'queued' || selected.status === 'running' ? (
+            <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">AI fikir üretimi arka planda devam ediyor.</p>
+          ) : (
+            <pre className="whitespace-pre-wrap text-sm">{selected.response}</pre>
+          )}
           <p className="text-sm opacity-60">Sure: {(selected as any).duration_ms || '-'} ms / Tahmini maliyet: ${(selected as any).estimated_cost_usd || 0}{Boolean((selected as any).sensitive_data_warning) && ' / Hassas veri uyarisi'}</p>
-          <div className="flex flex-wrap gap-2">
+          {selected.status !== 'failed' && selected.status !== 'queued' && selected.status !== 'running' && <div className="flex flex-wrap gap-2">
             <a className="btn" href={`/api/generations/${selected.id}/docx`}>DOCX indir</a>
             <form action={createIdeaFromGeneration} className="flex min-w-0 flex-1 gap-2"><input type="hidden" name="generation_id" value={selected.id}/><input name="title" required defaultValue={selected.action} className="min-w-0 flex-1"/><button>Taslak fikre donustur</button></form>
-          </div>
+          </div>}
         </section>
       )}
       <section className="card">
@@ -76,7 +87,7 @@ export default async function AIBrainstorm({
           <a href={`/ai-brainstorm?generation=${g.id}`} className="block border-t py-2" key={g.id}>
             <b>{g.action}</b>{' '}
             <span className="opacity-60">
-              / {g.model} / {g.app_name || 'No app'}
+              / {g.model} / {g.app_name || 'No app'} / {g.status || 'completed'}
             </span>
           </a>
         ))}
