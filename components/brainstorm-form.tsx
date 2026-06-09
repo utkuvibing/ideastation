@@ -6,20 +6,7 @@ import { useRouter } from 'next/navigation';
 import { runAIBrainstormWithState, type BrainstormState } from '@/app/actions';
 import { RandomFillButton } from '@/components/random-fill-button';
 import { randomBrainstormFields } from '@/lib/random-fill';
-
-const actions = [
-  'Generate 10 Short-Form Ideas',
-  'Generate UGC Ad Ideas',
-  'Generate Viral Hooks',
-  'Generate Problem/Solution Ads',
-  'Generate App Demo Ideas',
-  'Generate Meme Concepts',
-  'Generate Trend Adaptations',
-  'Generate Competitor-Inspired Concepts',
-  'Generate Low-Budget Video Ideas',
-  'Improve App Brief',
-  'Custom Brainstorm',
-];
+import { brainstormActions } from '@/lib/brainstorm-prompt';
 
 type App = { id: number; name: string };
 type Model = { id: string; label: string };
@@ -75,8 +62,8 @@ export function BrainstormForm({
       ) : (
         <input name="model" required placeholder="provider:modelID (örn: anthropic:claude-sonnet-4-5)" />
       )}
-      <select name="action" defaultValue={actions[0]}>
-        {actions.map((action) => <option key={action}>{action}</option>)}
+      <select name="action" defaultValue={brainstormActions[0]}>
+        {brainstormActions.map((action) => <option key={action}>{action}</option>)}
       </select>
       <textarea name="prompt" placeholder="Ek prompt / özel istek" className="min-h-32 md:col-span-2" />
       <SubmitButton />

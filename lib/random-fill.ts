@@ -72,14 +72,7 @@ export function randomIdeaFields(appIds: string[]): Record<string, string> {
   };
 }
 
-const brainstormActions = [
-  'Generate 10 Short-Form Ideas',
-  'Generate UGC Ad Ideas',
-  'Generate Viral Hooks',
-  'Generate Problem/Solution Ads',
-  'Generate App Demo Ideas',
-  'Custom Brainstorm',
-];
+import { brainstormActions } from '@/lib/brainstorm-prompt';
 
 export function randomBrainstormFields(
   appIds: string[],
@@ -88,7 +81,7 @@ export function randomBrainstormFields(
   return {
     app_id: appIds.length ? pick(appIds) : '',
     model: modelIds.length ? pick(modelIds) : '',
-    action: pick(brainstormActions),
+    action: pick([...brainstormActions]),
     prompt: pick([
       'Türkiye pazarı için 3 varyasyon üret. Hook max 8 kelime.',
       'Düşük bütçe, tek telefon çekimi. Founder tonu.',

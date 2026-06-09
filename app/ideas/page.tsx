@@ -4,7 +4,7 @@ import { IdeaCreateForm } from '@/components/idea-create-form';
 export const dynamic = 'force-dynamic';
 
 export default function Ideas() {
-  const apps: { id: number; name: string }[] = db.prepare('select id, name from apps order by name').all() as {
+  const apps: { id: number; name: string }[] = db.prepare('select id, name from apps where deleted_at is null order by name').all() as {
     id: number;
     name: string;
   }[];
@@ -17,7 +17,7 @@ export default function Ideas() {
     hook?: string;
   }[] = db
     .prepare(
-      'select ideas.*, apps.name app_name from ideas left join apps on apps.id=ideas.app_id order by ideas.id desc',
+      'select ideas.*, apps.name app_name from ideas left join apps on apps.id=ideas.app_id where ideas.deleted_at is null order by ideas.id desc',
     )
     .all() as {
     id: number;
@@ -29,7 +29,7 @@ export default function Ideas() {
   }[];
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Ideas</h1>
+      <div className="flex justify-between gap-3"><h1 className="text-3xl font-bold">Ideas</h1><div className="flex gap-2"><a className="btn" href="/api/export/ideas.csv">CSV</a><a className="btn" href="/api/export/ideas.pdf">PDF</a></div></div>
       {!apps.length ? (
         <p className="card text-sm opacity-70">Önce Apps sayfasından bir app ekle.</p>
       ) : (

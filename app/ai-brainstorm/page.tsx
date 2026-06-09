@@ -1,6 +1,7 @@
 import { db } from '@/lib/db';
 import { listOpenCodeModels } from '@/lib/ai';
 import { BrainstormForm } from '@/components/brainstorm-form';
+import { createIdeaFromGeneration } from '@/app/actions';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,7 +23,7 @@ export default async function AIBrainstorm({
     response?: string;
   }[] = db
     .prepare(
-      'select ai_generations.*, apps.name app_name from ai_generations left join apps on apps.id=ai_generations.app_id order by ai_generations.id desc limit 20',
+      'select ai_generations.*, apps.name app_name from ai_generations left join apps on apps.id=ai_generations.app_id where apps.deleted_at is null order by ai_generations.id desc limit 20',
     )
     .all() as { id: number; action: string; model: string; app_name?: string; response?: string }[];
   let models: { id: string; label: string }[] = [];
@@ -62,6 +63,11 @@ export default async function AIBrainstorm({
             Sonuç: {selected.action} / {selected.model}
           </h2>
           <pre className="whitespace-pre-wrap text-sm">{selected.response}</pre>
+          <p className="text-sm opacity-60">Sure: {(selected as any).duration_ms || '-'} ms / Tahmini maliyet: ${(selected as any).estimated_cost_usd || 0}{Boolean((selected as any).sensitive_data_warning) && ' / Hassas veri uyarisi'}</p>
+          <div className="flex flex-wrap gap-2">
+            <a className="btn" href={`/api/generations/${selected.id}/docx`}>DOCX indir</a>
+            <form action={createIdeaFromGeneration} className="flex min-w-0 flex-1 gap-2"><input type="hidden" name="generation_id" value={selected.id}/><input name="title" required defaultValue={selected.action} className="min-w-0 flex-1"/><button>Taslak fikre donustur</button></form>
+          </div>
         </section>
       )}
       <section className="card">

@@ -1,0 +1,6 @@
+import { db } from '@/lib/db';
+export const dynamic = 'force-dynamic';
+export default function Library() {
+  const rows = db.prepare(`SELECT ideas.id,ideas.title,ideas.hook,ideas.format,ideas.cta,apps.name app_name,SUM(pm.views) views,SUM(pm.clicks) clicks,SUM(pm.installs) installs,SUM(pm.spend) spend,SUM(pm.revenue) revenue FROM ideas JOIN apps ON apps.id=ideas.app_id JOIN performance_metrics pm ON pm.idea_id=ideas.id WHERE ideas.deleted_at IS NULL AND ideas.status='published' GROUP BY ideas.id ORDER BY CASE WHEN SUM(pm.spend)>0 THEN SUM(pm.revenue)/SUM(pm.spend) ELSE 0 END DESC,SUM(pm.installs) DESC LIMIT 100`).all() as Record<string,any>[];
+  return <div className="space-y-6"><h1 className="text-3xl font-bold">Winning Creative Library</h1><div className="grid gap-4 lg:grid-cols-2">{rows.map(x=><article className="card space-y-2" key={x.id}><a href={`/ideas/${x.id}`} className="text-lg font-bold">{x.title}</a><p className="text-sm opacity-60">{x.app_name} / {x.format}</p><p><b>Hook:</b> {x.hook||'-'}</p><p><b>CTA:</b> {x.cta||'-'}</p><p className="text-sm">Views {x.views} · Clicks {x.clicks} · Installs {x.installs} · ROAS {x.spend?(x.revenue/x.spend).toFixed(2):'-'}</p></article>)}</div>{!rows.length&&<div className="card">Performans verili published fikirler burada gorunur.</div>}</div>;
+}

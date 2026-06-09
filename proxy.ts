@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const publicPaths = ['/login'];
+const publicPaths = ['/login', '/api/health'];
 const sessionCookie = 'ideastation_session';
 
 function decodeBase64Url(value: string) {
@@ -11,6 +11,10 @@ function decodeBase64Url(value: string) {
 }
 
 async function hasValidSession(request: NextRequest) {
+  if (process.env.AUTH_MODE === 'trusted-header') {
+    const emailHeader = process.env.AUTH_EMAIL_HEADER || 'x-auth-request-email';
+    if (request.headers.get(emailHeader)?.trim()) return true;
+  }
   const value = request.cookies.get(sessionCookie)?.value;
   const secret = process.env.SESSION_SECRET;
   if (!value || !secret || secret.length < 32) return false;
