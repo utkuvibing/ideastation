@@ -1,6 +1,7 @@
 import { checkOpenCodeHealth } from '@/lib/ai';
 import { db } from '@/lib/db';
 import { resetWorkspaceData } from '@/app/actions';
+import { requireRole } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,6 +10,7 @@ export default async function Settings({
 }: {
   searchParams: Promise<{ reset?: string; error?: string }>;
 }) {
+  await requireRole('admin');
   const params = await searchParams;
   const health = await checkOpenCodeHealth();
   const baseUrl = process.env.OPENCODE_BASE_URL || 'http://127.0.0.1:4096';
@@ -23,6 +25,7 @@ export default async function Settings({
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold">Settings</h1>
+      <div className="flex flex-wrap gap-2"><a className="btn" href="/settings/trash">Recycle Bin</a><a className="btn" href="/settings/audit">Audit Log</a><a className="btn" href="/settings/operations">Operations</a></div>
       {params.reset && <div className="card border-green-500/40 text-green-700 dark:text-green-300">Workspace sıfırlandı (apps, ideas, feedback).</div>}
       {params.error === 'confirm' && <div className="card border-red-500/40 text-red-600 dark:text-red-300">Sıfırlamak için kutuya RESET yaz.</div>}
       <div className="card space-y-2">

@@ -9,9 +9,10 @@ export default function Kanban() {
       ideas.hook, ideas.ai_score, ideas.updated_at, apps.name AS app_name
     FROM ideas
     LEFT JOIN apps ON apps.id = ideas.app_id
+    WHERE ideas.deleted_at IS NULL AND apps.deleted_at IS NULL
     ORDER BY ideas.updated_at DESC, ideas.id DESC
   `).all() as Parameters<typeof KanbanBoard>[0]['initialIdeas'];
-  const apps = db.prepare('SELECT id, name, category, one_liner FROM apps ORDER BY name').all() as {
+  const apps = db.prepare('SELECT id, name, category, one_liner FROM apps WHERE deleted_at IS NULL ORDER BY name').all() as {
     id: number;
     name: string;
     category?: string;

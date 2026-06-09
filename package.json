@@ -1,1 +1,42 @@
-{"scripts":{"dev":"npm run free:ports && npm run build && npm run serve","free:ports":"node scripts/free-ports.mjs","serve":"concurrently --kill-others --names APP,AI --prefix-colors cyan,magenta \"next start\" \"npm:opencode:serve\"","dev:code":"npm run free:ports && concurrently --kill-others --names APP,AI --prefix-colors cyan,magenta \"next dev\" \"npm:opencode:serve\"","dev:app":"next dev","build":"next build","start":"npm run free:ports && npm run serve","typecheck":"tsc --noEmit","check:config":"dotenv -e .env -- node scripts/check-config.mjs","check":"npm run check:config && npm run typecheck && npm run build","backup":"dotenv -e .env -- node scripts/backup-db.mjs","opencode:serve":"dotenv -e .env -- opencode serve --port 4096 --hostname 127.0.0.1"},"dependencies":{"@types/better-sqlite3":"latest","better-sqlite3":"latest","docx":"latest","next":"latest","next-themes":"latest","pdfkit":"latest","react":"latest","react-dom":"latest","zod":"latest"},"devDependencies":{"@types/node":"latest","@types/react":"latest","@types/react-dom":"latest","autoprefixer":"latest","concurrently":"^10.0.3","dotenv-cli":"^11.0.0","postcss":"latest","tailwindcss":"^3.4.17","typescript":"latest"}}
+{
+  "scripts": {
+    "dev": "npm run migrate && npm run dev:code",
+    "free:ports": "node scripts/free-ports.mjs",
+    "serve": "concurrently --kill-others --names APP,AI --prefix-colors cyan,magenta \"next start\" \"npm:opencode:serve\"",
+    "dev:code": "concurrently --kill-others --names APP,AI --prefix-colors cyan,magenta \"next dev\" \"npm:opencode:serve\"",
+    "dev:app": "next dev",
+    "build": "next build",
+    "start": "npm run migrate && npm run serve",
+    "start:app": "npm run migrate && next start",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.mjs",
+    "check:config": "dotenv -e .env -- node scripts/check-config.mjs",
+    "migrate": "dotenv -e .env -- node scripts/migrate.mjs",
+    "check": "npm run check:config && npm run migrate && npm run test && npm run typecheck && npm run build",
+    "backup": "dotenv -e .env -- node scripts/backup-db.mjs",
+    "restore": "dotenv -e .env -- node scripts/restore-db.mjs",
+    "opencode:serve": "dotenv -e .env -- opencode serve --port 4096 --hostname 127.0.0.1"
+  },
+  "dependencies": {
+    "@types/better-sqlite3": "latest",
+    "better-sqlite3": "latest",
+    "docx": "latest",
+    "next": "latest",
+    "next-themes": "latest",
+    "pdfkit": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "autoprefixer": "latest",
+    "concurrently": "^10.0.3",
+    "dotenv-cli": "^11.0.0",
+    "postcss": "latest",
+    "tailwindcss": "^3.4.17",
+    "typescript": "latest"
+  }
+}

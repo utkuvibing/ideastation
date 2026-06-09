@@ -1,0 +1,30 @@
+services:
+  ideastation:
+    build: .
+    restart: unless-stopped
+    env_file: .env.production
+    volumes:
+      - ideastation-data:/app/data
+      - ideastation-backups:/app/backups
+    networks: [internal]
+
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      IDEASTATION_HOST: ${IDEASTATION_HOST}
+    volumes:
+      - ./ops/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    networks: [internal]
+
+networks:
+  internal:
+
+volumes:
+  ideastation-data:
+  ideastation-backups:
+  caddy-data:

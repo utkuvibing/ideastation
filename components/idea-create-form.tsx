@@ -86,6 +86,15 @@ export function IdeaCreateForm({
             <textarea key={field.name} name={field.name} placeholder={field.label} />
           ))}
           <input name="ai_score" type="number" min={0} max={10} placeholder="AI skoru (0-10)" />
+          <input name="owner" type="email" placeholder="Owner email" />
+          <input name="team" placeholder="Team" />
+          <input name="deadline" type="date" />
+          <select name="priority" defaultValue="medium"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select>
+          <input name="tags" placeholder="Tags (comma separated)" />
+          <input name="campaign" placeholder="Campaign" />
+          <input name="channel" placeholder="Channel" />
+          <input name="country" placeholder="Country" />
+          <input name="language" placeholder="Language" />
           <button className="md:col-span-2">Fikri kaydet</button>
         </form>
       )}

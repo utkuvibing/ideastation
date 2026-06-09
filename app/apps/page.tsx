@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 export default function Apps() {
   const apps: { id: number; name: string; one_liner?: string }[] = db
-    .prepare('select id, name, one_liner from apps order by id desc')
+    .prepare('select id, name, one_liner from apps where deleted_at is null order by id desc')
     .all() as { id: number; name: string; one_liner?: string }[];
   return (
     <div className="space-y-6">

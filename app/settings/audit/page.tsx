@@ -1,0 +1,3 @@
+import { db } from '@/lib/db'; import { requireRole } from '@/lib/auth';
+export const dynamic='force-dynamic';
+export default async function Audit(){await requireRole('admin'); const rows=db.prepare('select * from audit_log order by id desc limit 250').all() as Record<string,any>[]; return <div className="space-y-6"><h1 className="text-3xl font-bold">Audit Log</h1><section className="card overflow-auto"><table className="w-full text-sm"><tbody>{rows.map(r=><tr className="border-t" key={r.id}><td className="p-2">{r.created_at}</td><td>{r.actor}</td><td>{r.action}</td><td>{r.entity_type} #{r.entity_id}</td></tr>)}</tbody></table></section></div>}

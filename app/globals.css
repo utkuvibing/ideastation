@@ -5,6 +5,12 @@
 :root { color-scheme: light; }
 .dark { color-scheme: dark; }
 body { @apply bg-zinc-50 text-zinc-950 dark:bg-zinc-950 dark:text-zinc-50; }
-input, textarea, select { @apply bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2; }
+input, textarea, select { @apply w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2; }
 button, .btn { @apply rounded-lg px-3 py-2 bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-950 hover:opacity-90; }
 .card { @apply rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4 shadow-sm; }
+label { @apply grid gap-1 text-sm font-medium; }
+:focus-visible { @apply outline-none ring-2 ring-violet-500 ring-offset-2 dark:ring-offset-zinc-950; }
+th, td { @apply px-2 py-2 text-left align-top; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

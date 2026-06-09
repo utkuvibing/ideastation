@@ -27,12 +27,23 @@ function connectionHelp(baseUrl: string, path: string) {
 
 async function fetchJson(path: string, init?: RequestInit) {
   const baseUrl = getBaseUrl();
-  let res: Response;
-  try {
-    res = await fetch(`${baseUrl}${path}`, { ...init, headers: { ...authHeaders(), ...(init?.headers || {}) }, cache: 'no-store' });
-  } catch {
-    throw new Error(connectionHelp(baseUrl, path));
+  let res: Response | undefined;
+  const attempts = Number(process.env.AI_RETRY_COUNT || 2) + 1;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      res = await fetch(`${baseUrl}${path}`, {
+        ...init,
+        headers: { ...authHeaders(), ...(init?.headers || {}) },
+        cache: 'no-store',
+        signal: AbortSignal.timeout(Number(process.env.AI_TIMEOUT_MS || 90000)),
+      });
+      if (res.ok || res.status < 500 || attempt === attempts) break;
+    } catch {
+      if (attempt === attempts) throw new Error(connectionHelp(baseUrl, path));
+    }
+    await new Promise((resolve) => setTimeout(resolve, 250 * attempt));
   }
+  if (!res) throw new Error(connectionHelp(baseUrl, path));
   if (res.status === 401) {
     throw new Error(
       `${path}: 401 yetkisiz. .env içindeki OPENCODE_SERVER_PASSWORD, sunucuyu başlattığın şifreyle aynı olmalı. (OPENCODE_API_KEY yerel sunucu auth için kullanılmaz.)`,
@@ -80,6 +91,7 @@ function normalizeModel(model: string) {
 }
 
 export async function chatWithOpenCode(input: { model: string; messages: ChatMessage[]; temperature?: number; maxTokens?: number }) {
+  const startedAt = Date.now();
   const { providerID, modelID } = normalizeModel(input.model);
   const session = await fetchJson('/session', {
     method: 'POST',
@@ -99,5 +111,12 @@ export async function chatWithOpenCode(input: { model: string; messages: ChatMes
   });
   const parts = result.parts || [];
   const text = parts.map((p: any) => p.text || p.content || '').filter(Boolean).join('\n');
-  return text || JSON.stringify(result, null, 2);
+  const response = text || JSON.stringify(result, null, 2);
+  return {
+    text: response,
+    durationMs: Date.now() - startedAt,
+    inputChars: content.length,
+    outputChars: response.length,
+    estimatedCostUsd: Number(((content.length + response.length) / 4 / 1_000_000 * Number(process.env.AI_ESTIMATED_USD_PER_MILLION_TOKENS || 5)).toFixed(6)),
+  };
 }
