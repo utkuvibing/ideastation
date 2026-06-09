@@ -1,28 +1,46 @@
 # IdeaStation
 
-IdeaStation, mobil uygulamalar için reklam ve kısa video fikirlerini ekip içinde
-oluşturmak, AI ile geliştirmek ve Kanban üzerinden takip etmek için hazırlanmış
-bir fikir planlama aracıdır.
+IdeaStation, mobil uygulamalar için reklam ve short-form video fikirlerini ekip içinde
+oluşturmak, AI ile geliştirmek, onaylamak, üretime taşımak ve performansını ölçmek için
+hazırlanmış şirket içi yaratıcı operasyon platformudur.
 
 ## Özellikler
 
-- Uygulama ve kampanya brief'leri oluşturma
-- Hook, senaryo, storyboard ve prodüksiyon notları içeren fikir kartları
-- App bazlı Kanban, arama, filtreleme ve sürükle-bırak durum yönetimi
-- OpenCode üzerinden AI Brainstorm
-- AI işlemleri için yüklenme, başarı ve hata bildirimleri
-- Fikir başına skor ve geri bildirim
-- App ve fikir silme
-- İmzalı oturum ve ortam değişkeni tabanlı kullanıcı yönetimi
-- SQLite yedekleme ve yapılandırma kontrolü
+- App ve kampanya brief yönetimi
+- Action bazlı Türkçe AI Brainstorm şablonları
+- UGC, viral hook, app demo, meme, trend ve low-budget fikir üretimi
+- AI çıktısını taslak fikir kartına dönüştürme ve DOCX indirme
+- App bazlı Kanban ve kontrollü onay akışı
+- Owner, team, deadline, priority, tag, ülke, dil ve kanal alanları
+- Yorum, mention, uygulama içi bildirim ve Slack/Teams webhook desteği
+- Fikir ve brief revision geçmişi
+- Soft delete, recycle bin ve audit log
+- Yayınlanan kreatifler için performans metrikleri
+- App, ekip ve kampanya bazlı raporlar
+- Kazanan hook, format ve CTA kreatif kütüphanesi
+- Benzer ve mükerrer fikir tespiti
+- CSV, PDF ve DOCX export
+- RBAC, kurumsal proxy SSO ve hash'li yerel hesap desteği
+- Migration, otomatik backup/restore ve health endpoint
+- Docker Compose ve Caddy HTTPS dağıtım dosyaları
+
+## Roller
+
+| Rol | Yetki |
+| --- | --- |
+| `viewer` | İçerikleri, raporları ve export'ları görüntüler |
+| `reviewer` | Feedback verir, fikir onaylar veya reddeder |
+| `editor` | App, fikir, yorum, AI generation ve metrik yönetir |
+| `admin` | Silme, restore, audit ve operasyon yönetimi yapar |
 
 ## Teknolojiler
 
 - Next.js App Router ve Server Actions
-- React ve Tailwind CSS
+- React, TypeScript ve Tailwind CSS
 - SQLite (`better-sqlite3`)
 - OpenCode HTTP API
-- TypeScript
+- Zod
+- Docker Compose ve Caddy
 
 ## Kurulum
 
@@ -38,75 +56,107 @@ cd ideastation
 npm install
 ```
 
-Uygulamayı çalıştırmak için gerekli `.env` dosyasını proje yöneticisinden veya
-şirket içi güvenli paylaşım kanalından temin edip proje kök dizinine yerleştirin.
-Gerçek kullanıcı ve servis şifrelerini GitHub üzerinden paylaşmayın.
+Yerel kullanıcı formatı:
+
+```env
+AUTH_MODE=local
+SESSION_SECRET=<en-az-32-karakter-rastgele-değer>
+IDEASTATION_USERS=admin@example.com:admin:scrypt$...
+DATABASE_PATH=./data/app.db
+```
+
+Parola hash'i oluşturmak için:
+
+```bash
+node scripts/hash-password.mjs "uzun-ve-rastgele-parola"
+```
+
+Kurumsal SSO kurulumu ve production ayarları için
+[ops/PRODUCTION.md](ops/PRODUCTION.md) dosyasını kullanın.
 
 ## Çalıştırma
 
-Normal kullanım için:
+Migration ve geliştirme sunucuları:
 
 ```bash
 npm run dev
 ```
 
-Bu komut:
-
-1. Kullanılan `3000` ve `4096` portlarını temizler.
-2. Production build oluşturur.
-3. Next.js ve OpenCode sunucusunu aynı terminalde başlatır.
-
-Uygulama: [http://localhost:3000](http://localhost:3000)
-
-Kod geliştirirken hot reload için:
+Yalnızca Next.js geliştirme sunucusu:
 
 ```bash
-npm run dev:code
+npm run dev:app
 ```
 
-## Kontrol ve Yedekleme
+Production:
 
-Yapılandırma, TypeScript ve production build kontrolü:
+```bash
+npm run build
+npm run start
+```
+
+Uygulama varsayılan olarak [http://localhost:3000](http://localhost:3000)
+adresinde çalışır. OpenCode sunucusu `127.0.0.1:4096` adresinde başlatılır.
+
+## Kontrol ve Veri Operasyonları
+
+Tam release kontrolü:
 
 ```bash
 npm run check
 ```
 
-SQLite yedeği:
+Bu komut config kontrolü, migration, test, TypeScript ve production build çalıştırır.
 
 ```bash
 npm run backup
+npm run restore -- backups/ideastation-<timestamp>.db
+npm run migrate
 ```
 
-Yedekler varsayılan olarak `backups/` dizinine yazılır.
+Health endpoint:
+
+```text
+/api/health
+```
 
 ## Sayfalar
 
 | Rota | Açıklama |
 | --- | --- |
-| `/` | Genel durum ve son fikirler |
-| `/apps` | App brief oluşturma ve yönetme |
-| `/ideas` | Fikir oluşturma, inceleme ve geri bildirim |
-| `/kanban` | App bazlı üretim ve yayın süreci |
-| `/ai-brainstorm` | OpenCode ile fikir üretme ve geçmiş |
-| `/settings` | OpenCode durumu ve çalışma alanı ayarları |
+| `/` | App ve ekip bazlı dashboard |
+| `/apps` | App brief yönetimi |
+| `/ideas` | Fikir oluşturma, düzenleme ve export |
+| `/kanban` | Üretim ve onay akışı |
+| `/ai-brainstorm` | Action bazlı AI üretimi ve DOCX export |
+| `/reports` | Kampanya ve performans raporları |
+| `/library` | Kazanan kreatif kütüphanesi |
+| `/notifications` | Atama, mention ve durum bildirimleri |
+| `/settings` | Sistem ayarları |
+| `/settings/trash` | Recycle bin |
+| `/settings/audit` | Audit log |
+| `/settings/operations` | Uptime ve hata kayıtları |
 
 ## Proje Yapısı
 
 ```text
-app/          Sayfalar ve Server Actions
-components/   Formlar ve etkileşimli arayüz bileşenleri
-lib/          Veritabanı, AI, auth ve ortak tanımlar
-scripts/      Yapılandırma, port temizleme ve yedekleme araçları
-proxy.ts      Rota ve oturum koruması
+app/          Sayfalar, API rotaları ve Server Actions
+components/   Formlar ve etkileşimli UI bileşenleri
+lib/          Auth, AI, validation, workflow ve veri servisleri
+scripts/      Migration, config, backup ve restore araçları
+ops/          Production runbook ve reverse proxy ayarları
+tests/        Otomatik Node testleri
 data/         SQLite veritabanı, Git dışında tutulur
 backups/      Yerel yedekler, Git dışında tutulur
 ```
 
-## Operasyon Notları
+## Güvenlik ve Operasyon
 
-- `.env`, `data/` ve `backups/` repoya gönderilmez.
-- Uygulamayı şirket VPN'i veya HTTPS sağlayan bir iç ağ geçidi arkasında yayınlayın.
-- SQLite dosyasını uygulama sunucusunun yerel kalıcı diskinde tutun.
-- `backups/` dizinini düzenli olarak ayrı bir kalıcı depoya kopyalayın.
-- AI çıktıları geçmişe kaydedilir ancak otomatik olarak fikir kartına dönüştürülmez.
+- `.env`, `.env.production`, `data/` ve `backups/` repoya gönderilmez.
+- Trusted-header SSO kullanılırken uygulama portu doğrudan internete açılmaz.
+- Production yerel hesaplarında düz metin parola kabul edilmez.
+- Backup dosyaları ayrı ve şifreli bir depoya kopyalanmalıdır.
+- AI çıktıları doğrulanmadan yayınlanmamalıdır.
+- Sağlık, finans ve performans iddialarında kesin sonuç garantisi verilmemelidir.
+
+Değişiklik geçmişi için [CHANGELOG.md](CHANGELOG.md) dosyasına bakın.
