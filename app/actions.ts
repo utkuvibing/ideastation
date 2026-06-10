@@ -2,14 +2,12 @@
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { db } from '@/lib/db';
-import { chatWithOpenCode } from '@/lib/ai';
 import { createSession, credentialsAreValid, deleteSession, requireRole } from '@/lib/auth';
 import { ideaStatuses, type IdeaStatus } from '@/lib/idea-statuses';
 import { appSchema, feedbackSchema, formObject, ideaSchema, performanceSchema } from '@/lib/validation';
-import { hasSensitiveData, logError, mentionedEmails, notify, saveRevision } from '@/lib/operations';
+import { audit, mentionedEmails, notify, saveRevision } from '@/lib/operations';
 import { canTransition, transitionRequiresReviewer } from '@/lib/workflow';
 import { sendWorkflowWebhooks } from '@/lib/webhooks';
-import { buildBrainstormPrompt } from '@/lib/brainstorm-prompt';
 
 const statuses = new Set<string>(ideaStatuses.map((status) => status.id));
 
@@ -17,12 +15,6 @@ function requiredText(form: FormData, field: string, maxLength = 200) {
   const value = String(form.get(field) || '').trim();
   if (!value || value.length > maxLength) throw new Error(`${field} is required and must be at most ${maxLength} characters.`);
   return value;
-}
-
-function audit(actor: string, action: string, entityType: string, entityId?: number | bigint, metadata?: object) {
-  db.prepare(
-    'INSERT INTO audit_log (actor, action, entity_type, entity_id, metadata) VALUES (?, ?, ?, ?, ?)',
-  ).run(actor, action, entityType, entityId ? Number(entityId) : null, metadata ? JSON.stringify(metadata) : null);
 }
 
 export async function login(form: FormData) {
@@ -247,62 +239,4 @@ export async function resetWorkspaceData(form: FormData) {
   audit(session.email, 'reset', 'workspace');
   revalidatePath('/');
   redirect('/settings?reset=1');
-}
-
-export async function runAIBrainstorm(form: FormData) {
-  const session = await requireRole('editor');
-  const appId = String(form.get('app_id') || '');
-  const model = String(form.get('model') || '').trim();
-  const action = String(form.get('action') || 'Custom Brainstorm');
-  const extraPrompt = String(form.get('prompt') || '').trim().slice(0, 20000);
-  if (!model) redirect('/ai-brainstorm?error=model');
-  const app: any = appId ? db.prepare('select * from apps where id=?').get(appId) : null;
-  const prompt = buildBrainstormPrompt(app, action, extraPrompt);
-  const ai = await chatWithOpenCode({ model, messages: [{ role: 'user', content: prompt }] });
-  const result = db.prepare('INSERT INTO ai_generations (app_id,provider,model,action,prompt,response,created_by,duration_ms,input_chars,output_chars,estimated_cost_usd,sensitive_data_warning) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)').run(appId || null, 'opencode', model, action, prompt, ai.text, session.email, ai.durationMs, ai.inputChars, ai.outputChars, ai.estimatedCostUsd, hasSensitiveData(prompt) ? 1 : 0);
-  audit(session.email, 'generate', 'ai_generation', result.lastInsertRowid);
-  redirect(`/ai-brainstorm?generation=${result.lastInsertRowid}`);
-}
-
-export type BrainstormState = {
-  status: 'idle' | 'success' | 'error';
-  message?: string;
-  generationId?: number;
-  response?: string;
-};
-
-export async function runAIBrainstormWithState(
-  _previousState: BrainstormState,
-  form: FormData,
-): Promise<BrainstormState> {
-  try {
-    const session = await requireRole('editor');
-    const appId = String(form.get('app_id') || '');
-    const model = String(form.get('model') || '').trim();
-    const action = String(form.get('action') || 'Custom Brainstorm');
-    const extraPrompt = String(form.get('prompt') || '').trim().slice(0, 20000);
-    if (!model) return { status: 'error', message: 'Bir AI modeli seçmelisin.' };
-    const app: any = appId ? db.prepare('select * from apps where id=?').get(appId) : null;
-    if (appId && !app) return { status: 'error', message: 'Seçilen app bulunamadı.' };
-    const prompt = buildBrainstormPrompt(app, action, extraPrompt);
-    const ai = await chatWithOpenCode({ model, messages: [{ role: 'user', content: prompt }] });
-    const result = db.prepare(
-      'INSERT INTO ai_generations (app_id,provider,model,action,prompt,response,created_by,duration_ms,input_chars,output_chars,estimated_cost_usd,sensitive_data_warning) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
-    ).run(appId || null, 'opencode', model, action, prompt, ai.text, session.email, ai.durationMs, ai.inputChars, ai.outputChars, ai.estimatedCostUsd, hasSensitiveData(prompt) ? 1 : 0);
-    const generationId = Number(result.lastInsertRowid);
-    audit(session.email, 'generate', 'ai_generation', generationId);
-    revalidatePath('/ai-brainstorm');
-    return {
-      status: 'success',
-      message: 'Brainstorm tamamlandı ve geçmişe kaydedildi.',
-      generationId,
-      response: ai.text,
-    };
-  } catch (error) {
-    logError('ai_brainstorm', error);
-    return {
-      status: 'error',
-      message: error instanceof Error ? error.message : 'Brainstorm sırasında bilinmeyen bir hata oluştu.',
-    };
-  }
 }

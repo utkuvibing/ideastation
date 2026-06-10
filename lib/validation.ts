@@ -69,6 +69,13 @@ export const performanceSchema = z.object({
   revenue: z.coerce.number().min(0),
 });
 
+export const brainstormJobSchema = z.object({
+  appId: z.coerce.number().int().positive(),
+  model: z.string().trim().min(1).max(200),
+  action: optionalText(200).transform((value) => value || 'Custom Brainstorm'),
+  prompt: optionalText(20000),
+});
+
 export const feedbackSchema = z.object({
   idea_id: z.coerce.number().int().positive(),
   sentiment: optionalText(50),

@@ -1,6 +1,12 @@
 import { db } from '@/lib/db';
 export { hasSensitiveData, mentionedEmails } from '@/lib/text-signals';
 
+export function audit(actor: string, action: string, entityType: string, entityId?: number | bigint, metadata?: object) {
+  db.prepare(
+    'INSERT INTO audit_log (actor, action, entity_type, entity_id, metadata) VALUES (?, ?, ?, ?, ?)',
+  ).run(actor, action, entityType, entityId === undefined ? null : Number(entityId), metadata ? JSON.stringify(metadata) : null);
+}
+
 export function logError(source: string, error: unknown, actor?: string, metadata?: object) {
   const value = error instanceof Error ? error : new Error(String(error));
   db.prepare('INSERT INTO error_log (source,message,stack,actor,metadata) VALUES (?,?,?,?,?)')
