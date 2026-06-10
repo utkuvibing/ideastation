@@ -2,8 +2,32 @@ import { db } from '@/lib/db';
 import { listOpenCodeModels } from '@/lib/ai';
 import { BrainstormForm } from '@/components/brainstorm-form';
 import { createIdeaFromGeneration } from '@/app/actions';
+import type { AIGenerationRow } from '@/lib/ai-jobs';
 
 export const dynamic = 'force-dynamic';
+
+type AIBrainstormGeneration = AIGenerationRow & { app_name?: string | null };
+
+function GenerationBody({ generation }: { generation: AIBrainstormGeneration }) {
+  switch (generation.status) {
+    case 'failed':
+      return (
+        <div role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-red-700 dark:text-red-300">
+          <h3 className="font-bold">AI fikir üretimi başarısız</h3>
+          <p className="mt-1 whitespace-pre-wrap text-sm">{generation.error_message || 'Bilinmeyen bir hata oluştu.'}</p>
+        </div>
+      );
+    case 'queued':
+    case 'running':
+      return <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">AI fikir üretimi arka planda devam ediyor.</p>;
+    case 'completed':
+      return <pre className="whitespace-pre-wrap text-sm">{generation.response}</pre>;
+    default: {
+      const exhaustive: never = generation.status;
+      return exhaustive;
+    }
+  }
+}
 
 export default async function AIBrainstorm({
   searchParams,
@@ -15,19 +39,11 @@ export default async function AIBrainstorm({
     id: number;
     name: string;
   }[];
-  const gens: {
-    id: number;
-    action: string;
-    model: string;
-    app_name?: string;
-    response?: string;
-    status?: string;
-    error_message?: string;
-  }[] = db
+  const gens = db
     .prepare(
       'select ai_generations.*, apps.name app_name from ai_generations left join apps on apps.id=ai_generations.app_id where apps.deleted_at is null order by ai_generations.id desc limit 20',
     )
-    .all() as { id: number; action: string; model: string; app_name?: string; response?: string }[];
+    .all() as AIBrainstormGeneration[];
   let models: { id: string; label: string }[] = [];
   let modelError = '';
   try {
@@ -37,7 +53,7 @@ export default async function AIBrainstorm({
   }
   const selected = params.generation
     ? (gens.find((g) => String(g.id) === String(params.generation)) ||
-        (db.prepare('select * from ai_generations where id=?').get(params.generation) as typeof gens[0] | undefined))
+        (db.prepare('select * from ai_generations where id=?').get(params.generation) as AIBrainstormGeneration | undefined))
     : null;
 
   return (
@@ -64,18 +80,9 @@ export default async function AIBrainstorm({
           <h2 className="font-bold">
             Sonuç: {selected.action} / {selected.model}
           </h2>
-          {selected.status === 'failed' ? (
-            <div role="alert" className="rounded-lg border border-red-500/40 bg-red-500/10 p-4 text-red-700 dark:text-red-300">
-              <h3 className="font-bold">AI fikir üretimi başarısız</h3>
-              <p className="mt-1 whitespace-pre-wrap text-sm">{selected.error_message || 'Bilinmeyen bir hata oluştu.'}</p>
-            </div>
-          ) : selected.status === 'queued' || selected.status === 'running' ? (
-            <p className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4">AI fikir üretimi arka planda devam ediyor.</p>
-          ) : (
-            <pre className="whitespace-pre-wrap text-sm">{selected.response}</pre>
-          )}
-          <p className="text-sm opacity-60">Sure: {(selected as any).duration_ms || '-'} ms / Tahmini maliyet: ${(selected as any).estimated_cost_usd || 0}{Boolean((selected as any).sensitive_data_warning) && ' / Hassas veri uyarisi'}</p>
-          {selected.status !== 'failed' && selected.status !== 'queued' && selected.status !== 'running' && <div className="flex flex-wrap gap-2">
+          <GenerationBody generation={selected} />
+          <p className="text-sm opacity-60">Sure: {selected.duration_ms ?? '-'} ms / Tahmini maliyet: ${selected.estimated_cost_usd ?? 0}{Boolean(selected.sensitive_data_warning) && ' / Hassas veri uyarisi'}</p>
+          {selected.status === 'completed' && <div className="flex flex-wrap gap-2">
             <a className="btn" href={`/api/generations/${selected.id}/docx`}>DOCX indir</a>
             <form action={createIdeaFromGeneration} className="flex min-w-0 flex-1 gap-2"><input type="hidden" name="generation_id" value={selected.id}/><input name="title" required defaultValue={selected.action} className="min-w-0 flex-1"/><button>Taslak fikre donustur</button></form>
           </div>}

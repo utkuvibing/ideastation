@@ -30,12 +30,8 @@ export function BrainstormForm({ apps, models, defaultAppId }: { apps: App[]; mo
           prompt: form.get('prompt'),
         }),
       });
-      const result = await response.json();
+      const result = await response.json() as { error?: string };
       if (!response.ok) throw new Error(result.error || 'AI isi baslatilamadi.');
-      const active = new Set<number>(JSON.parse(localStorage.getItem('ideastation_active_ai_jobs') || '[]'));
-      active.add(result.generationId);
-      localStorage.setItem('ideastation_active_ai_jobs', JSON.stringify([...active]));
-      window.dispatchEvent(new CustomEvent('ideastation:ai-job-started', { detail: result }));
       setMessage('AI fikir uretimi arka planda basladi. Diger sayfalara gecebilirsiniz.');
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'AI isi baslatilamadi.');
