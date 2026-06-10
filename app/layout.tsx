@@ -14,7 +14,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </nav>
       <aside className="w-64 border-r border-zinc-200 dark:border-zinc-800 p-4 space-y-3 hidden md:block">
         <div className="font-bold text-lg">Short Video Ideas</div>
-        <div className="text-xs opacity-60">{name}<br />{session?.role}</div>
+        <div className="text-xs opacity-60">{session?.role}</div>
         {['Dashboard','Apps','Ideas','Kanban','AI Brainstorm','Reports','Library','Notifications','Settings'].map(x => <Link className="block rounded-lg px-3 py-2 hover:bg-zinc-100 dark:hover:bg-zinc-900" href={x==='Dashboard'?'/':`/${x.toLowerCase().replaceAll(' ','-')}`} key={x}>{x}</Link>)}
         <form action={logout}><button className="w-full">Çıkış yap</button></form>
       </aside>
