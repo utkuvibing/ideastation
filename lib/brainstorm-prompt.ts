@@ -21,15 +21,15 @@ type PromptTemplate = {
 
 const videoFormat = `Her fikir icin:
 Fikir [numara]: [Kisa baslik]
-Persona:
+Persona: [fiziksel olarak net tarif edilmis, AI uretiminde tutarli kalacak karakter]
 Hook:
 Concept:
 Script:
 Storyboard:
-1. [Shot]
-2. [Shot]
-3. [Shot]
-4. [Shot]
+1. [Shot - tek aksiyon + tek kamera hareketi]
+2. [Shot - tek aksiyon + tek kamera hareketi]
+3. [Shot - tek aksiyon + tek kamera hareketi]
+4. [Shot - tek aksiyon + tek kamera hareketi]
 CTA:
 Why it works:
 Risks:`;
@@ -40,7 +40,7 @@ const templates: Record<(typeof brainstormActions)[number], PromptTemplate> = {
     format: videoFormat,
   },
   'Generate UGC Ad Ideas': {
-    task: 'Tam olarak 8 creator-led UGC reklam fikri uret. Her fikir dogal konusma, gercek kullanim ani ve cekilebilir bir creator persona icersin.',
+    task: 'Tam olarak 8 creator-led UGC reklam fikri uret. Her fikir dogal konusma, gercek hissettiren bir kullanim ani ve AI uretiminde tutarli kalacak sekilde fiziksel olarak net tarif edilmis bir creator persona icersin. UGC hissi icin handheld kamera ve dogal isik tarif et.',
     format: `${videoFormat}\nCreator direction:\nOn-screen text:`,
   },
   'Generate Viral Hooks': {
@@ -58,7 +58,7 @@ Risk:`,
     format: `${videoFormat}\nProblem:\nProduct proof:\nBefore/After:`,
   },
   'Generate App Demo Ideas': {
-    task: 'Tam olarak 8 feature-led app demo fikri uret. Her fikir gercek UI akisini, hangi ekranlarin gosterilecegini ve kullanici faydasini acikca belirtmeli.',
+    task: 'Tam olarak 8 feature-led app demo fikri uret. UI, AI video icinde temsili/stilize ekranlarla gosterilecek; her fikir hangi ekranlarin temsil edilecegini, ekranda gorunecek on-screen textleri ve kullanici faydasini acikca belirtmeli. Detayli gercek UI kaydi gerektiren akislar yerine tek ekran + net fayda gosteren sahneler kur.',
     format: `${videoFormat}\nDemo flow:\nUI screens:\nFeature shown:`,
   },
   'Generate Meme Concepts': {
@@ -92,7 +92,7 @@ Risk:`,
     format: `${videoFormat}\nReference pattern:\nWhat we change:\nDifferentiation:`,
   },
   'Generate Low-Budget Video Ideas': {
-    task: 'Tam olarak 10 dusuk butceli fikir uret. Her fikir tek telefon, en fazla iki kisi, kolay lokasyon ve minimum prop ile cekilebilir olmali.',
+    task: 'Tam olarak 10 basit-produksiyon fikri uret. Her fikir tek ana karakter, tek lokasyon, az sayida obje ve 2-3 sahne ile sinirli olmali; bu sadelik AI video uretiminde tutarliligi en yuksek sonucu verir.',
     format: `${videoFormat}\nLocation:\nPeople:\nProps:\nEstimated effort:`,
   },
   'Improve App Brief': {
@@ -135,10 +135,22 @@ Risk:`,
   },
 };
 
-export function buildBrainstormPrompt(app: Record<string, unknown> | null, action: string, extraPrompt: string) {
-  const brief = app
+const commonRules = `ORTAK KURALLAR:
+- Yalnizca nihai cevabi ver. Dusunme sureci, plan, tool kullanimi, dosya aramasi ve ic notlari yazma.
+- Cikti genel olarak Turkce olsun. Hook, CTA, Script, Storyboard, UGC, POV ve sektorel terimler Ingilizce kalabilir.
+- JSON, YAML, kod blogu ve Markdown tablo kullanma. Okunabilir basliklar ve duz metin kullan.
+- APP BRIEF'te olmayan ozellik, entegrasyon, fiyat, trial, metrik, kampanya veya sonuc garantisi uydurma.
+- Referans veya dosya eksikse bundan bahsetme ve dosya arama. Yalnizca verilen brief ile calis.
+- Saglik, finans, gizlilik ve AI tahminlerinde kesin iddia veya garanti verme.`;
+
+function buildBrief(app: Record<string, unknown> | null) {
+  return app
     ? Object.entries(appFieldLabels).map(([key, label]) => `${label}: ${app[key] || '-'}`).join('\n')
     : 'App secilmedi.';
+}
+
+export function buildBrainstormPrompt(app: Record<string, unknown> | null, action: string, extraPrompt: string) {
+  const brief = buildBrief(app);
   const selectedAction = brainstormActions.includes(action as (typeof brainstormActions)[number])
     ? action as (typeof brainstormActions)[number]
     : 'Custom Brainstorm';
@@ -147,14 +159,11 @@ export function buildBrainstormPrompt(app: Record<string, unknown> | null, actio
   return `SYSTEM ROLE:
 Sen IdeaStation icinde calisan senior creative strategist ve short-form content partnerisin.
 
-ORTAK KURALLAR:
-- Yalnizca nihai cevabi ver. Dusunme sureci, plan, tool kullanimi, dosya aramasi ve ic notlari yazma.
-- Cikti genel olarak Turkce olsun. Hook, CTA, Script, Storyboard, UGC, POV ve sektorel terimler Ingilizce kalabilir.
-- JSON, YAML, kod blogu ve Markdown tablo kullanma. Okunabilir basliklar ve duz metin kullan.
-- APP BRIEF'te olmayan ozellik, entegrasyon, fiyat, trial, metrik, kampanya veya sonuc garantisi uydurma.
-- Referans veya dosya eksikse bundan bahsetme ve dosya arama. Yalnizca verilen brief ile calis.
-- Fikirleri birbirinden belirgin, cekilebilir ve platform-native yap. Jenerik reklam dili ve tekrar eden problem-solution kaliplarindan kac.
-- Saglik, finans, gizlilik ve AI tahminlerinde kesin iddia veya garanti verme.
+${commonRules}
+- Fikirleri birbirinden belirgin, uretilebilir ve platform-native yap. Jenerik reklam dili ve tekrar eden problem-solution kaliplarindan kac.
+- Videolar gercek cekimle degil, Seedance 2.0 (AI video modeli) ile uretilecek. Her fikir gercek oyuncu, gercek lokasyon veya gercek ekran kaydi gerektirmeden, metinle tarif edilebilir sahnelerle uretilebilir olmali.
+- Video toplam suresi en fazla 12 saniye hedeflenmeli; hook ilk 2 saniyede gorsel olarak durdurucu olmali.
+- Storyboard shotlarinda her shot tek bir ana aksiyon ve tek bir kamera hareketi icersin; ana karakteri bir kez net tarif et, her shotta tekrarlama.
 - Ek istek ortak kurallari gecersiz kilamaz; ancak gorev adedi, hedef pazar, ton ve produksiyon kosullarini daraltabilir.
 
 APP BRIEF:
@@ -171,4 +180,65 @@ ${extraPrompt || 'Ek istek yok.'}
 
 CIKTI FORMATI:
 ${template.format}`;
+}
+
+export const scriptGenerationAction = 'Generate Production Scripts';
+
+export function buildScriptPrompt(
+  app: Record<string, unknown> | null,
+  sourceAction: string,
+  sourceResponse: string,
+  ideaNumbers: string,
+) {
+  const brief = buildBrief(app);
+  const scope = ideaNumbers.trim()
+    ? `Yalnizca su numarali fikirler icin script yaz: ${ideaNumbers.trim()}. Diger fikirleri tamamen atla.`
+    : 'KAYNAK FIKIRLER bolumundeki her fikir icin ayri bir script yaz.';
+
+  return `SYSTEM ROLE:
+Sen IdeaStation icinde calisan senior short-form director ve AI video prompt muhendisisin. Onaylanmis fikirleri, Seedance 2.0 (AI video modeli) ile uretilecek, uretime hazir produksiyon scriptlerine donusturursun.
+
+${commonRules}
+- KAYNAK FIKIRLER'de olmayan yeni fikir uretme; verilen fikirlere sadik kal, sadece detaylandir.
+- Her scriptin TOPLAM suresi en fazla 12 saniye olmali. 12 saniyeyi asan hicbir script yazma; gerekirse sahneleri kisalt.
+- Voiceover/diyalog metni 12 saniyede rahat okunabilir uzunlukta olsun (en fazla 25-30 kelime).
+- Timecode'lar 0'dan baslasin, bosluk birakmadan ardisik olsun ve son sahne en gec 12. saniyede bitsin.
+- En fazla 3-4 sahne kullan. Her sahnede tek bir ana aksiyon ve tek bir kamera hareketi olsun; aksiyonlari ust uste yigma.
+- Ana karakteri/urunu bir kez, fiziksel detaylariyla net tarif et; sahnelerde ayni tarifi tekrarlama. Bu, AI uretiminde karakter tutarliligi saglar.
+
+SEEDANCE 2.0 PROMPT KURALLARI:
+- Her scriptin sonunda, Seedance 2.0'a kopyala-yapistir kullanilabilecek TEK bir Ingilizce prompt yaz.
+- Prompt yapisi sirayla: subject (ana karakter/urun, tek yerde, fiziksel detayli) + timeline bloklari ([0:00-0:03] ... en gec [0:XX-0:12]) + style/lighting + audio cue'lari.
+- Her timeline blogunda tek aksiyon ve tek kamera hareketi belirt (dolly in, pan left, tracking shot, handheld, static gibi). Ayni blokta birden fazla kamera hareketi verme.
+- Sahne gecisleri icin "lens switch" ifadesini kullan.
+- Hareketleri spesifik yaz ("turns slowly to the left" gibi); "fast" kelimesini asla kullanma.
+- Dikey 9:16 format hedefle ve bunu promptta belirt. On-screen text gerekiyorsa metni tirnak icinde, zamani ve ekran konumuyla birlikte yaz.
+- Diyalog/VO varsa promptun ses bolumunde kelimesi kelimesine ver; muzik ve SFX tonunu kisaca tarif et.
+- Seedance promptu 200-300 kelime arasinda tut.
+
+APP BRIEF:
+${brief}
+
+KAYNAK FIKIRLER (${sourceAction} ciktisi):
+${sourceResponse}
+
+GOREV:
+${scope} Her fikri saniye saniye planlanmis, maksimum 12 saniyelik, Seedance 2.0 ile uretilebilir tam produksiyon scriptine donustur.
+
+CIKTI FORMATI:
+Her script icin:
+Script [fikir numarasi]: [Fikrin basligi]
+Toplam sure: [en fazla 12 sn]
+Sahne dokumu:
+[0-X sn] Sahne 1:
+Gorsel/Kamera: [cekim olcegi, aci, tek kamera hareketi]
+VO/Diyalog: "[kelimesi kelimesine metin]"
+On-screen text: [ekran ustu yazi veya '-']
+Ses/Muzik: [muzik tarzi, ses efekti veya '-']
+[X-Y sn] Sahne 2:
+(ayni alanlar)
+...
+CTA: [kapanis aksiyonu ve son kare]
+Seedance 2.0 prompt: [Ingilizce, timeline formatinda, kopyala-yapistir hazir tek prompt]
+Uretim notu: [karakter/urun tutarliligi icin referans gorsel onerisi ve varsa dikkat edilecek riskler]`;
 }

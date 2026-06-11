@@ -5,14 +5,29 @@ export default async function Login({ searchParams }: { searchParams: Promise<{ 
   if (process.env.AUTH_MODE === 'trusted-header') redirect('/');
   const params = await searchParams;
   return (
-    <main className="min-h-screen grid place-items-center p-6">
-      <form action={login} className="card w-full max-w-sm space-y-4">
-        <div><p className="text-sm opacity-60">AsunaTech</p><h1 className="text-2xl font-bold">IdeaStation Login</h1></div>
-        {params.error && <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-300">Email veya parola hatali.</div>}
-        <input name="email" type="email" placeholder="Email" required className="w-full" />
-        <input name="password" type="password" placeholder="Password" required className="w-full" />
-        <button className="w-full">Giris Yap</button>
-      </form>
+    <main className="grid min-h-screen place-items-center bg-zinc-50 p-6 dark:bg-zinc-950">
+      <div className="w-full max-w-sm space-y-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <span aria-hidden="true" className="grid h-12 w-12 place-items-center rounded-xl bg-violet-600 text-lg font-bold text-white dark:bg-violet-500">IS</span>
+          <div>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">AsunaTech</p>
+            <h1 className="text-2xl font-bold">IdeaStation</h1>
+          </div>
+        </div>
+        <form action={login} className="card space-y-4 p-6">
+          {params.error && <div role="alert" className="alert-error">Email veya parola hatalı.</div>}
+          <label>
+            Email
+            <input name="email" type="email" placeholder="ornek@firma.com" autoComplete="email" required />
+          </label>
+          <label>
+            Parola
+            <input name="password" type="password" placeholder="••••••••" autoComplete="current-password" required />
+          </label>
+          <button className="w-full">Giriş yap</button>
+        </form>
+        <p className="text-center text-xs text-zinc-400 dark:text-zinc-500">Kısa video fikirlerini yönet, üret ve yayınla.</p>
+      </div>
     </main>
   );
 }

@@ -110,7 +110,9 @@ export async function chatWithOpenCode(input: { model: string; messages: ChatMes
     }),
   });
   const parts = result.parts || [];
-  const text = parts.map((p: any) => p.text || p.content || '').filter(Boolean).join('\n');
+  // Reasoning models return separate 'reasoning' parts; only 'text' parts are the final answer.
+  const finalParts = parts.filter((p: any) => p.type === 'text');
+  const text = (finalParts.length ? finalParts : parts).map((p: any) => p.text || p.content || '').filter(Boolean).join('\n');
   const response = text || JSON.stringify(result, null, 2);
   return {
     text: response,

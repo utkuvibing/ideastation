@@ -9,7 +9,7 @@ export function RandomFillButton({ fill, label = 'Random doldur' }: Props) {
   return (
     <button
       type="button"
-      className="border border-zinc-300 dark:border-zinc-600 bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
+      className="btn-secondary btn-sm"
       onClick={(e) => {
         const form = e.currentTarget.closest('form');
         if (!form) return;

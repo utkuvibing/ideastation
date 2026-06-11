@@ -25,6 +25,7 @@ export type AIGenerationRow = {
   error_message: string | null;
   started_at: string | null;
   completed_at: string | null;
+  parent_generation_id: number | null;
 };
 
 let interruptedGenerationRecoveryRan = false;

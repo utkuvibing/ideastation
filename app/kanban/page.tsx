@@ -21,10 +21,10 @@ export default function Kanban() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-3xl font-bold">Kanban</h1>
-        <p className="mt-1 opacity-60">App seç, o app için kart oluştur ve fikirleri üretim aşamaları arasında taşı.</p>
-      </div>
+      <header>
+        <h1 className="text-2xl font-bold">Kanban</h1>
+        <p className="page-subtitle">App seç, o app için kart oluştur ve fikirleri üretim aşamaları arasında taşı.</p>
+      </header>
       <KanbanBoard initialIdeas={ideas} apps={apps} />
     </div>
   );

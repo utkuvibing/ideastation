@@ -9,6 +9,8 @@ hazırlanmış şirket içi yaratıcı operasyon platformudur.
 - App ve kampanya brief yönetimi
 - Action bazlı Türkçe AI Brainstorm şablonları
 - UGC, viral hook, app demo, meme, trend ve low-budget fikir üretimi
+- Fikirlerden maksimum 12 saniyelik detaylı prodüksiyon scripti üretimi (timecode, VO, kamera, ses)
+- Her script için kopyala-yapıştır hazır Seedance 2.0 video prompt'u
 - AI çıktısını taslak fikir kartına dönüştürme ve DOCX indirme
 - App bazlı Kanban ve kontrollü onay akışı
 - Owner, team, deadline, priority, tag, ülke, dil ve kanal alanları
@@ -20,6 +22,7 @@ hazırlanmış şirket içi yaratıcı operasyon platformudur.
 - Kazanan hook, format ve CTA kreatif kütüphanesi
 - Benzer ve mükerrer fikir tespiti
 - CSV, PDF ve DOCX export
+- Koyu/açık tema ve modern, responsive arayüz
 - RBAC, kurumsal proxy SSO ve hash'li yerel hesap desteği
 - Migration, otomatik backup/restore ve health endpoint
 - Docker Compose ve Caddy HTTPS dağıtım dosyaları
@@ -128,7 +131,7 @@ Health endpoint:
 | `/apps` | App brief yönetimi |
 | `/ideas` | Fikir oluşturma, düzenleme ve export |
 | `/kanban` | Üretim ve onay akışı |
-| `/ai-brainstorm` | Action bazlı AI üretimi ve DOCX export |
+| `/ai-brainstorm` | Action bazlı AI üretimi, detaylı script üretimi ve DOCX export |
 | `/reports` | Kampanya ve performans raporları |
 | `/library` | Kazanan kreatif kütüphanesi |
 | `/notifications` | Atama, mention ve durum bildirimleri |

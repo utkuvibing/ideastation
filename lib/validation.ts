@@ -76,6 +76,12 @@ export const brainstormJobSchema = z.object({
   prompt: optionalText(20000),
 });
 
+export const scriptJobSchema = z.object({
+  parentGenerationId: z.coerce.number().int().positive(),
+  model: optionalText(200),
+  ideaNumbers: optionalText(200),
+});
+
 export const feedbackSchema = z.object({
   idea_id: z.coerce.number().int().positive(),
   sentiment: optionalText(50),

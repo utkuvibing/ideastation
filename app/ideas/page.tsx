@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { IdeaCreateForm } from '@/components/idea-create-form';
+import { StatusBadge } from '@/components/status-badge';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,26 +30,42 @@ export default function Ideas() {
   }[];
   return (
     <div className="space-y-6">
-      <div className="flex justify-between gap-3"><h1 className="text-3xl font-bold">Ideas</h1><div className="flex gap-2"><a className="btn" href="/api/export/ideas.csv">CSV</a><a className="btn" href="/api/export/ideas.pdf">PDF</a></div></div>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <header>
+          <h1 className="text-2xl font-bold">Ideas</h1>
+          <p className="page-subtitle">{ideas.length} fikir · tüm app&apos;ler</p>
+        </header>
+        <div className="flex gap-2">
+          <a className="btn btn-secondary" href="/api/export/ideas.csv">CSV indir</a>
+          <a className="btn btn-secondary" href="/api/export/ideas.pdf">PDF indir</a>
+        </div>
+      </div>
       {!apps.length ? (
-        <p className="card text-sm opacity-70">Önce Apps sayfasından bir app ekle.</p>
+        <div className="card py-10 text-center">
+          <h2 className="font-semibold">Önce bir app ekle</h2>
+          <p className="muted mt-1 text-sm">Fikirler bir app&apos;e bağlı oluşturulur.</p>
+          <a className="btn mt-4 inline-flex" href="/apps">Apps sayfasına git</a>
+        </div>
       ) : (
         <IdeaCreateForm apps={apps} />
       )}
       <div className="space-y-3">
-        {!ideas.length && (
-          <div className="card py-10 text-center">
-            <h2 className="font-bold">Henüz fikir yok</h2>
-            <p className="mt-1 text-sm opacity-60">“Yeni fikir ekle” ile ilk fikri oluştur.</p>
+        {!ideas.length && apps.length > 0 && (
+          <div className="card py-12 text-center">
+            <h2 className="font-semibold">Henüz fikir yok</h2>
+            <p className="muted mt-1 text-sm">“Yeni fikir ekle” ile ilk fikri oluştur.</p>
           </div>
         )}
         {ideas.map((i) => (
-          <a className="card block" href={`/ideas/${i.id}`} key={i.id}>
-            <b>{i.title}</b>
-            <p className="opacity-60">
-              {i.app_name} / {i.format} / {i.status}
+          <a className="card card-hover block" href={`/ideas/${i.id}`} key={i.id}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="min-w-0 truncate font-semibold">{i.title}</h2>
+              <StatusBadge status={i.status} />
+            </div>
+            <p className="muted mt-1 text-sm">
+              {[i.app_name, i.format].filter(Boolean).join(' · ')}
             </p>
-            <p>{i.hook}</p>
+            {i.hook && <p className="mt-2 line-clamp-2 text-sm">{i.hook}</p>}
           </a>
         ))}
       </div>

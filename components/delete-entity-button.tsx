@@ -32,11 +32,10 @@ export function DeleteEntityButton({
       }}
     >
       <input type="hidden" name={idField} value={entityId} />
-      <button
-        type="submit"
-        disabled={pending}
-        className="border border-red-500/50 bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 dark:bg-red-600 dark:text-white"
-      >
+      <button type="submit" disabled={pending} className="btn-danger">
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+          <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6" />
+        </svg>
         {pending ? 'Siliniyor...' : `${entityType === 'app' ? 'App’i' : 'Fikri'} sil`}
       </button>
     </form>

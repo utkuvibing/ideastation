@@ -4,6 +4,30 @@ Bu projedeki önemli değişiklikler bu dosyada belgelenir.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-06-11
+
+### Added
+
+- İki aşamalı AI pipeline: tamamlanan fikir üretimlerinden "Detaylı Script Üret" ile prodüksiyon scripti üretme
+- Maksimum 12 saniyelik, timecode, VO/diyalog, on-screen text, kamera ve ses/müzik içeren script formatı
+- Her script için kopyala-yapıştır hazır, İngilizce, timeline formatında Seedance 2.0 video prompt'u
+- Fikir numarası filtresi ve model seçimi ile script üretim formu
+- `ai_generations` tablosuna `parent_generation_id` kolonu ve kaynak üretim ile script arasında iki yönlü bağlantı
+- `/api/ai-jobs/scripts` endpoint'i ve `Generate Production Scripts` aksiyonu
+- Koyu/açık tema desteği (`next-themes`) ve tema değiştirme düğmesi
+- Durum rozetleri, boş/yükleniyor durumları ve ikonlu yan menü navigasyonu
+
+### Changed
+
+- Tüm sayfalar ortak bir tasarım sistemiyle (buton, kart, rozet, uyarı, form stilleri) modern SaaS arayüzüne dönüştürüldü
+- AI Brainstorm prompt'ları Seedance 2.0 (AI video) üretimine göre optimize edildi: tek aksiyon + tek kamera hareketi, 12 saniye hedefi, AI üretiminde tutarlı persona tarifleri
+- UGC, App Demo ve Low-Budget şablonları gerçek çekim yerine AI video üretimi varsayımıyla güncellendi
+
+### Fixed
+
+- Reasoning modellerinin (qwen, minimax vb.) düşünme sürecinin AI çıktısının başına sızması engellendi; yalnızca nihai metin part'ları kaydediliyor
+- App düzenleme formunda zorunlu `name` alanının render edilmemesi düzeltildi
+
 ## [1.0.0] - 2026-06-09
 
 ### Added

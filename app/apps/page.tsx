@@ -9,13 +9,22 @@ export default function Apps() {
     .all() as { id: number; name: string; one_liner?: string }[];
   return (
     <div className="space-y-6">
-      <h1 className="text-3xl font-bold">Apps</h1>
+      <header>
+        <h1 className="text-2xl font-bold">Apps</h1>
+        <p className="page-subtitle">Her app için marka brief&apos;i oluştur; fikirler ve AI brainstorm bu brief&apos;i kullanır.</p>
+      </header>
       <AppCreateForm />
-      <div className="grid md:grid-cols-2 gap-4">
+      {!apps.length && (
+        <div className="card py-12 text-center">
+          <h2 className="font-semibold">Henüz app yok</h2>
+          <p className="muted mt-1 text-sm">Yukarıdaki formla ilk app brief&apos;ini oluştur.</p>
+        </div>
+      )}
+      <div className="grid gap-4 md:grid-cols-2">
         {apps.map((a) => (
-          <a className="card" href={`/apps/${a.id}`} key={a.id}>
-            <b>{a.name}</b>
-            <p className="opacity-70">{a.one_liner}</p>
+          <a className="card card-hover" href={`/apps/${a.id}`} key={a.id}>
+            <h2 className="font-semibold">{a.name}</h2>
+            <p className="muted mt-1 line-clamp-2 text-sm">{a.one_liner || 'Kısa tanım eklenmemiş.'}</p>
           </a>
         ))}
       </div>

@@ -56,14 +56,14 @@ export function AIJobToasts() {
   return (
     <div aria-live="polite" className="fixed bottom-4 right-4 z-50 grid w-[min(24rem,calc(100vw-2rem))] gap-3">
       {toasts.map((job) => (
-        <section key={job.id} className={`card shadow-xl ${job.status === 'failed' ? 'border-red-500/50' : 'border-green-500/50'}`}>
-          <h2 className="font-bold">{job.status === 'failed' ? 'AI fikir uretimi basarisiz' : 'AI fikirleri hazir'}</h2>
-          <p className="mt-1 text-sm">{job.status === 'failed' ? job.error_message || 'Bilinmeyen bir hata olustu.' : `${job.action} tamamlandi.`}</p>
+        <section key={job.id} role="status" className={`card border-l-4 shadow-xl ${job.status === 'failed' ? 'border-l-red-500' : 'border-l-emerald-500'}`}>
+          <h2 className="text-sm font-semibold">{job.status === 'failed' ? 'AI fikir üretimi başarısız' : 'AI fikirleri hazır'}</h2>
+          <p className="muted mt-1 text-sm">{job.status === 'failed' ? job.error_message || 'Bilinmeyen bir hata oluştu.' : `${job.action} tamamlandı.`}</p>
           <div className="mt-3 flex gap-2">
-            <Link className="btn" href={`/ai-brainstorm?generation=${job.id}`} onClick={() => dismiss(job)}>
-              {job.status === 'failed' ? 'Detayi gor' : 'Fikri gor'}
+            <Link className="btn btn-sm" href={`/ai-brainstorm?generation=${job.id}`} onClick={() => dismiss(job)}>
+              {job.status === 'failed' ? 'Detayı gör' : 'Fikri gör'}
             </Link>
-            <button type="button" onClick={() => dismiss(job)}>Tamam</button>
+            <button type="button" className="btn-ghost btn-sm" onClick={() => dismiss(job)}>Kapat</button>
           </div>
         </section>
       ))}

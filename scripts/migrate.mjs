@@ -130,6 +130,11 @@ const migrations = [
     CREATE INDEX IF NOT EXISTS idx_ai_generations_user_status
       ON ai_generations(created_by, status, id);
   `},
+  { version: 6, name: 'script_generation_parent_link', sql: `
+    ALTER TABLE ai_generations ADD COLUMN parent_generation_id INTEGER REFERENCES ai_generations(id) ON DELETE SET NULL;
+    CREATE INDEX IF NOT EXISTS idx_ai_generations_parent
+      ON ai_generations(parent_generation_id);
+  `},
 ];
 
 db.exec('CREATE TABLE IF NOT EXISTS schema_migrations (version INTEGER PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP)');
