@@ -4,6 +4,15 @@ Bu projedeki önemli değişiklikler bu dosyada belgelenir.
 
 ## [Unreleased]
 
+### Added
+
+- Ideas sayfasına istemci tarafı arama, durum filtresi, sıralama ve filtrelenmiş boş durum eklendi.
+
+### Changed
+
+- Dashboard, hızlı aksiyonlar ve daha belirgin metrik kartlarıyla ürün ana sayfası gibi yeniden düzenlendi.
+- Global kart, buton, form, mobil üst bar ve tema geçişi stilleri daha rafine SaaS görünümü için iyileştirildi.
+
 ## [1.1.0] - 2026-06-11
 
 ### Added

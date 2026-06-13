@@ -22,7 +22,7 @@ hazırlanmış şirket içi yaratıcı operasyon platformudur.
 - Kazanan hook, format ve CTA kreatif kütüphanesi
 - Benzer ve mükerrer fikir tespiti
 - CSV, PDF ve DOCX export
-- Koyu/açık tema ve modern, responsive arayüz
+- Koyu/açık tema, modern responsive arayüz ve filtrelenebilir fikir listesi
 - RBAC, kurumsal proxy SSO ve hash'li yerel hesap desteği
 - Migration, otomatik backup/restore ve health endpoint
 - Docker Compose ve Caddy HTTPS dağıtım dosyaları
@@ -127,9 +127,9 @@ Health endpoint:
 
 | Rota | Açıklama |
 | --- | --- |
-| `/` | App ve ekip bazlı dashboard |
+| `/` | App, ekip, hızlı aksiyon ve son fikirler dashboard'u |
 | `/apps` | App brief yönetimi |
-| `/ideas` | Fikir oluşturma, düzenleme ve export |
+| `/ideas` | Fikir oluşturma, arama/filtreleme/sıralama ve export |
 | `/kanban` | Üretim ve onay akışı |
 | `/ai-brainstorm` | Action bazlı AI üretimi, detaylı script üretimi ve DOCX export |
 | `/reports` | Kampanya ve performans raporları |
