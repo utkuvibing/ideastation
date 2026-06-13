@@ -4,14 +4,24 @@ Bu projedeki önemli değişiklikler bu dosyada belgelenir.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-06-13
+
 ### Added
 
-- Ideas sayfasına istemci tarafı arama, durum filtresi, sıralama ve filtrelenmiş boş durum eklendi.
+- Ideas sayfasına istemci tarafında çalışan arama, durum filtresi ve sıralama kontrolleri eklendi.
+- Ideas listesine sonuç sayacı ve arama/filtre eşleşmediğinde gösterilen özel boş durum eklendi.
 
 ### Changed
 
-- Dashboard, hızlı aksiyonlar ve daha belirgin metrik kartlarıyla ürün ana sayfası gibi yeniden düzenlendi.
-- Global kart, buton, form, mobil üst bar ve tema geçişi stilleri daha rafine SaaS görünümü için iyileştirildi.
+- Dashboard, ürün ana sayfası gibi çalışacak şekilde hero alanı, hızlı aksiyonlar ve daha belirgin metrik kartlarıyla yeniden düzenlendi.
+- Fikir kartları; başlık, app/format bilgisi, durum rozeti ve hook önizlemesi daha kolay taranacak şekilde iyileştirildi.
+- Global kart, buton, form, mobil üst bar, yan menü ve tema geçişi stilleri daha rafine SaaS görünümü için güncellendi.
+- Mobil görünümde üst navigasyon ve tema/çıkış kontrolleri daha kompakt hale getirildi.
+
+### Verified
+
+- `npm run typecheck`, `npm run build` ve `npm run test` başarılı çalıştırıldı.
+- Yerel test verisiyle `/`, `/ideas`, `/kanban` ve `/apps` sayfaları masaüstü ve mobil görünümde görsel olarak kontrol edildi.
 
 ## [1.1.0] - 2026-06-11
 
