@@ -3,7 +3,15 @@
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
 
-export function ThemeToggle({ className = '', variant = 'ghost' }: { className?: string; variant?: 'ghost' | 'secondary' }) {
+export function ThemeToggle({
+  className = '',
+  variant = 'ghost',
+  compact = false,
+}: {
+  className?: string;
+  variant?: 'ghost' | 'secondary';
+  compact?: boolean;
+}) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
@@ -26,7 +34,7 @@ export function ThemeToggle({ className = '', variant = 'ghost' }: { className?:
           <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" />
         </svg>
       )}
-      <span>{mounted ? (isDark ? 'Açık tema' : 'Koyu tema') : 'Tema'}</span>
+      <span className={compact ? 'sr-only' : ''}>{mounted ? (isDark ? 'Açık tema' : 'Koyu tema') : 'Tema'}</span>
     </button>
   );
 }

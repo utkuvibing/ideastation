@@ -12,6 +12,13 @@ const statLabels: Record<string, string> = {
   revenue: 'Gelir ($)',
 };
 
+const statDescriptions: Record<string, string> = {
+  apps: 'Aktif brief',
+  ideas: 'Üretim havuzu',
+  published: 'Canlı kreatif',
+  revenue: 'Toplam performans',
+};
+
 export default async function Dashboard() {
   if (!(await getSession())) redirect('/login');
   const stats = db.prepare(`SELECT (SELECT COUNT(*) FROM apps WHERE deleted_at IS NULL) apps,(SELECT COUNT(*) FROM ideas WHERE deleted_at IS NULL) ideas,(SELECT COUNT(*) FROM ideas WHERE deleted_at IS NULL AND status='published') published,(SELECT COALESCE(SUM(revenue),0) FROM performance_metrics) revenue`).get() as Record<string,any>;
@@ -20,15 +27,32 @@ export default async function Dashboard() {
   const recent = db.prepare('select ideas.*,apps.name app_name from ideas join apps on apps.id=ideas.app_id where ideas.deleted_at is null order by ideas.updated_at desc limit 8').all() as Record<string,any>[];
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="page-subtitle">Fikir üretiminin ve yayın performansının genel görünümü.</p>
-      </header>
+      <section className="card relative overflow-hidden p-6 sm:p-7">
+        <div aria-hidden="true" className="absolute right-0 top-0 h-32 w-32 rounded-full bg-violet-500/10 blur-3xl" />
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <header className="max-w-2xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-600 dark:text-violet-300">Creative operations</p>
+            <h1 className="mt-2 text-3xl font-bold tracking-tight sm:text-4xl">IdeaStation</h1>
+            <p className="page-subtitle text-base">App brieflerinden AI üretime, onay akışından performans takibine kadar kısa video fikirlerini tek yerde yönet.</p>
+          </header>
+          <div className="flex flex-wrap gap-2">
+            <a className="btn" href="/ideas">Yeni fikir oluştur</a>
+            <a className="btn btn-secondary" href="/ai-brainstorm">AI brainstorm</a>
+            <a className="btn btn-secondary" href="/kanban">Kanban’a git</a>
+          </div>
+        </div>
+      </section>
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {Object.entries(stats).map(([key, value]) => (
-          <div className="card" key={key}>
-            <p className="text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{statLabels[key] ?? key}</p>
-            <p className="mt-2 text-3xl font-bold tabular-nums">{Number(value).toLocaleString('tr-TR')}</p>
+          <div className="card overflow-hidden" key={key}>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-medium uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{statLabels[key] ?? key}</p>
+                <p className="mt-2 text-3xl font-bold tabular-nums">{Number(value).toLocaleString('tr-TR')}</p>
+              </div>
+              <span aria-hidden="true" className="mt-1 h-2.5 w-2.5 rounded-full bg-violet-500/70 shadow-sm shadow-violet-500/40" />
+            </div>
+            <p className="muted mt-3 text-xs">{statDescriptions[key] ?? 'Özet metrik'}</p>
           </div>
         ))}
       </div>
